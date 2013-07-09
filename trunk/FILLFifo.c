@@ -1,8 +1,33 @@
-/** FIFOFill
- * What is this? It is the thread that copies a field of VBI to the FIFO.
- * Copyright Peter Kwan (c) 2013. All rights reserved
- */
-
+/** ***************************************************************************
+ * Title: FIFOFill.c
+ * Description       : VBIT: Copy packets to the FIFO
+ * The purpose is to fill the FIFO after VBI.
+ * The timing ensures that we don't attempt this during VBI.
+ * Other timing enables us to suspend the process when we know that there is nothing to be done.
+ *
+ * Compiler          : GCC
+ *
+ * Copyright (C) 2013, Peter Kwan
+ *
+ * Permission to use, copy, modify, and distribute this software
+ * and its documentation for any purpose and without fee is hereby
+ * granted, provided that the above copyright notice appear in all
+ * copies and that both that the copyright notice and this
+ * permission notice and warranty disclaimer appear in supporting
+ * documentation, and that the name of the author not be used in
+ * advertising or publicity pertaining to distribution of the
+ * software without specific, written prior permission.
+ *
+ * The author disclaims all warranties with regard to this
+ * software, including all implied warranties of merchantability
+ * and fitness.  In no event shall the author be liable for any
+ * special, indirect or consequential damages or any damages
+ * whatsoever resulting from loss of use, data or profits, whether
+ * in an action of contract, negligence or other tortious action,
+ * arising out of or in connection with the use or performance of
+ * this software.
+ ****************************************************************************/
+ 
 #include "FILLFifo.h"
 
 // A test routine to stuff a buffer full of text

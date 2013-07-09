@@ -1,3 +1,31 @@
+/** ***************************************************************************
+ * Description       : VBIT: Magazine page to packet converter.
+ * The Pages folder is scanned for pages belonging to a mag.
+ * This list of pages is used to sequence packets for this mag.
+ * There are eight instances of this thread, one per mag.
+ *
+ * Compiler          : GCC
+ *
+ * Copyright (C) 2013, Peter Kwan
+ *
+ * Permission to use, copy, modify, and distribute this software
+ * and its documentation for any purpose and without fee is hereby
+ * granted, provided that the above copyright notice appear in all
+ * copies and that both that the copyright notice and this
+ * permission notice and warranty disclaimer appear in supporting
+ * documentation, and that the name of the author not be used in
+ * advertising or publicity pertaining to distribution of the
+ * software without specific, written prior permission.
+ *
+ * The author disclaims all warranties with regard to this
+ * software, including all implied warranties of merchantability
+ * and fitness.  In no event shall the author be liable for any
+ * special, indirect or consequential damages or any damages
+ * whatsoever resulting from loss of use, data or profits, whether
+ * in an action of contract, negligence or other tortious action,
+ * arising out of or in connection with the use or performance of
+ * this software.
+ ****************************************************************************/
 /** Mag thread
  * Each magazine operates in its own thread.
  * Each mag knows what mag number it is.
@@ -34,8 +62,8 @@ uint8_t getMag(void)
 	return num;
 }
 
-/** getList - Populate the magazine list
- * Declare the list in domag so we use auto variables. So each thread gets its own.
+/** getList - Populate a magazine list
+ * Declare the list in domag so we use auto variables. So each thread gets its own environment.
  */
 uint8_t getList(PAGE **txList,uint8_t mag)
 {
@@ -93,7 +121,7 @@ uint8_t getList(PAGE **txList,uint8_t mag)
 	return 1;
 
   return 0;	
-}
+} // getList
 
 /** domag is the thread that manages a single magazine
  * Finds and sorts all the pages for a particular magazine.
@@ -246,6 +274,9 @@ void domag(void)
 } // domag
 
 
+/** MagInit creates eight domag threads
+ * It also sets up the buffers that each thread will use to forward packets.
+ */
 void magInit(void)
 {
 	int i;
@@ -261,6 +292,6 @@ void magInit(void)
 		magThread[(i+1)%8]=0;
 		pthread_create(&magThread[(i+1)%8],NULL,(void*)domag,(void*)&r1);
 	}
-}
+} // magInit
 
 

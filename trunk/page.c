@@ -1,4 +1,5 @@
 /** ***************************************************************************
+ * Name				: page.c
  * Description       : VBIT Teletext Page Parser
  *
  * Copyright (C) 2010-2013, Peter Kwan
@@ -95,11 +96,21 @@ uint8_t ParseLine(PAGE *page, char *str)
 			page->control=n;
 		}
 		break;
-	//Why don't we decode these entries?
-	// 1) Either we don't need them, or we do need them later but we need to save memory 
 	case 'C':; // CT,nn,<T|C> - cycle time
+		page->timerMode='T';	// C is not implemented and was a daft idea in any case
+		// get the nn which we expect to start at str[3]
+		page->time=strtol(&str[3],NULL,0);
 		break;
+	//Why don't we decode these entries?
+	// 1) Either we don't need them, or we do need them later but we need to save AVR memory 
+	// This isn't important on a Raspberry Pi.
 	case 'S':; // SP - filename or SC - subcode
+		if (str[1]=='C')
+		{
+			n=strtol(&str[3],NULL,0);
+			// if (n>0) printf("Lets decode a subcode. %d YAY!\n",n);
+			page->subcode=n;	// When subcode is greater than 0 it is a carousel
+		}
 		break;
 	case 'M':; // MS - no idea
 		break;
