@@ -41,8 +41,8 @@ typedef struct _PAGE_
 	unsigned char page;		/// 00..99 page number
 	unsigned char subpage;	/// 00..99 (not part of ETSI spec [or is it?])
 	unsigned int subcode;	/// subcode (we use it to hold subpage)
-	unsigned char timerMode; /// C=times around magazine, T=timed
-	unsigned int time;		/// seconds
+	unsigned char timerMode; /// C=cycle. Counts the retransmits before the next page. T=timed. C seems like a daft idea to me so we will default to T.
+	unsigned int time;		/// seconds (from CT command)
 	unsigned int control;	/// C bits and non ETSI bits (See tti specification)
 	unsigned int filesize;	/// Size (bytes) of the file that this page was parsed from
 	unsigned int redirect;	/// FIFO ram page to get text data from, instead of from the file. 0..SRAMPAGECOUNT

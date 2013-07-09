@@ -1,17 +1,38 @@
-/** buffer.c
- * Maintains circular buffer of packets.
+/** ***************************************************************************
+ * Title			: buffer.c
+ * Description       : VBIT packet buffering
+ * Initialise and manage circular buffers:
  * Initialise buffer
  * Add packet to buffer
  * Pop packet from buffer
  * Buffer tests: full, empty
+ * It also detects and rewrites teletext header packets.
  * Support multiple buffers: one per magazine and one for stream.c
- * TODO: Need a flag to indicate if it is a header and we have to wait for the next field
  * 
- */
+ * Compiler          : GCC
+ *
+ * Copyright (C) 2013, Peter Kwan
+ *
+ * Permission to use, copy, modify, and distribute this software
+ * and its documentation for any purpose and without fee is hereby
+ * granted, provided that the above copyright notice appear in all
+ * copies and that both that the copyright notice and this
+ * permission notice and warranty disclaimer appear in supporting
+ * documentation, and that the name of the author not be used in
+ * advertising or publicity pertaining to distribution of the
+ * software without specific, written prior permission.
+ *
+ * The author disclaims all warranties with regard to this
+ * software, including all implied warranties of merchantability
+ * and fitness.  In no event shall the author be liable for any
+ * special, indirect or consequential damages or any damages
+ * whatsoever resulting from loss of use, data or profits, whether
+ * in an action of contract, negligence or other tortious action,
+ * arising out of or in connection with the use or performance of
+ * this software.
+ ****************************************************************************/
 
 #include "buffer.h"
-
-extern volatile uint32_t UTC; // Time from vbit.c
 
 // Could do with a buffer structure
 // An array of packets
@@ -243,7 +264,7 @@ uint8_t bufferMove(bufferpacket *dest, bufferpacket *src)
 			b = (b & 0x55) << 1 | (b & 0xAA) >> 1;	
 			b&=0x7f;
 			c=DehamTable[b];
-			printf("ptr[3]=%02x Rev=%02x mag=%02x mag=%02x. ",pkt[3],b,c,mag);
+			// printf("ptr[3]=%02x Rev=%02x mag=%02x mag=%02x. ",pkt[3],b,c,mag);
 		}
 		
 		timer=time(NULL);
