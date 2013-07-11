@@ -96,15 +96,12 @@ uint8_t ParseLine(PAGE *page, char *str)
 			page->control=n;
 		}
 		break;
-	case 'C':; // CT,nn,<T|C> - cycle time
+	case 'C': // CT,nn,<T|C> - cycle time
 		page->timerMode='T';	// C is not implemented and was a daft idea in any case
 		// get the nn which we expect to start at str[3]
 		page->time=strtol(&str[3],NULL,0);
 		break;
-	//Why don't we decode these entries?
-	// 1) Either we don't need them, or we do need them later but we need to save AVR memory 
-	// This isn't important on a Raspberry Pi.
-	case 'S':; // SP - filename or SC - subcode
+	case 'S': // SP - filename or SC - subcode
 		if (str[1]=='C')
 		{
 			n=strtol(&str[3],NULL,0);
@@ -112,6 +109,9 @@ uint8_t ParseLine(PAGE *page, char *str)
 			page->subcode=n;	// When subcode is greater than 0 it is a carousel
 		}
 		break;
+	//Why don't we decode these entries?
+	// 1) Either we don't need them, or we do need them later but we need to save AVR memory 
+	// Don't need to save memory on Raspberry Pi.
 	case 'M':; // MS - no idea
 		break;
 	case 'O':; // OL - output line
@@ -147,7 +147,6 @@ uint8_t ParsePage(PAGE *page, char *filename)
 {
 	FILE *file;
 	char *str;
-	int i;
 	const unsigned char MAXLINE=80;
 	char line[MAXLINE];
 	// printf("[Parse page]Started looking at %s\n",filename);

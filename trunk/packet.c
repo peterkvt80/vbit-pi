@@ -101,7 +101,6 @@ uint8_t copyOL(char *packet, char *textline)
 		// if ((*p & 0x7f)==0) *p=' '; // In case a null sneaked in
 		p++;
 	}
-// if (!*textline) xputc('T'); // Not sure what this means
 	return linenumber;
 } // copyOL
 
@@ -232,9 +231,8 @@ void PacketHeader(char *packet ,unsigned char mag, unsigned char page, unsigned 
 		ch=page%0x10; // page units
 		*p++=ch+(ch>9?'7':'0');
 	}
-	// xputc(packet[20]); // Echo the mag for debugging
 	// Stick the time in. Need to implement flexible date/time formatting
-	utc=UTC;
+	utc=0;	// This was time in seconds since midnight. This code now runs in buffer.c
 	sec=utc%60;
 	utc/=60;
 	min=utc%60;
