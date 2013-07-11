@@ -17,14 +17,12 @@ struct timespec gFieldTimespec;
 volatile uint8_t gOddField;
 
 volatile uint8_t vbiDone; // Set when the timer reckons that the vbi is over. Cleared by main.
-volatile uint32_t UTC; // =36000; // 10:00am
 volatile uint8_t FIFOBusy;	// When set, the FillFIFO process is required to release the FIFO.
 volatile uint8_t fifoReadIndex; /// maintains the tx block index 0..MAXFIFOINDEX-1
 volatile uint8_t fifoWriteIndex; /// maintains the load index 0..MAXFIFOINDEX-1
 
 /** everyFieldInterrupt is called.... every field.
- * It maintains the UTC clock
- * and sets off the vbi timing sequence.
+ * It sets off the vbi timing sequence.
  * This is the start of the field and vbi will be going out
  * so we need to wait about 1024uS while VBIT sends out the vbi. 
 */ 
@@ -46,24 +44,6 @@ void everyFieldInterrupt(void)
 	// Flip the LED
 	if (i==HIGH) i=LOW; else i=HIGH;
 	digitalWrite (GPIO_LED,  i) ;
-	// Maintain the UTC. Is this a good idea to lock time to the video rather than the CPU? Probably not.
-	count++;
-	if ((count%50)==0)	// Every second
-	{
-		UTC++;
-		if (UTC>=day)
-			UTC=0;
-// #define RUN_FADER
-#ifdef RUN_FADER
-		// SISCom databroadcast fader
-		// This is a periodic command sent exercise the SISCOM receiver
-		// Toggle the fade direction every 3 seconds
-		strcpy(str,"\016fade,0,1\n");
-		str[6]=((UTC/3)%2==0)?'1':'0';
-		putringstring(str);
-#endif	
-	}	
-	// 
 	 
 }
 

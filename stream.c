@@ -28,7 +28,7 @@ return 0;
 
 PI_THREAD (Stream)
 {
-	int mag;
+	int mag=0;
 	uint8_t line=0;
 	uint8_t i;
 	uint8_t result;
@@ -76,12 +76,12 @@ PI_THREAD (Stream)
 			switch (result)
 			{
 			case 3: 	// Buffer full. This is good because it means that we are not holding things up
-				//printf("[Stream] Destination full\n");// WOULD BE NICE TO KNOW WHICH ONE
+				// printf("[Stream] Destination full\n");// Either we are up to date or FIFOFill has stalled. Which one is it? 
 				//delay(1);	// Hold so we can see the message (WiringPi)
 				break;
 			case 4: 	// Source not ready. We expect mag to send us something very soon
 				// If a stream has no pages, this branch will get called a lot
-				// printf("[Stream] Waiting for source\n");
+				// printf("[Stream] Waiting for source\n"); // If this is called then mag has failed.
 				delay(1);	// Hold so we can see the error
 				break;
 			case 2:		// Header row

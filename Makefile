@@ -4,7 +4,7 @@
 CC=gcc
 
 #Set any compiler flags you want to use (e.g. "-I."), or leave blank
-CFLAGS = -Wall -I.
+CFLAGS = -O2 -Wall -I.
 
 #Set any dependant files (e.g. header files) so that if they are edited they cause a re-compile (e.g. "main.h my_sub_functions.h some_definitions_file.h"), or leave blank
 DEPS = pins.h
