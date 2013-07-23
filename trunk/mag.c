@@ -110,7 +110,7 @@ uint8_t addCarousel(CAROUSEL *c,PAGE *p)
 	uint8_t timeInterval=0;
 	uint32_t sc;
 	char str[80];
-	printf("K");
+	//printf("K");
 	PAGE p;
 	ClearPage(&p);
 	// Get the current time
@@ -122,8 +122,8 @@ uint8_t addCarousel(CAROUSEL *c,PAGE *p)
 		{
 			// This is all about finding the next subcode and 
 			// moving the file pointer ready to transmit the next page
-			printf("Seeking subcode %d \n",c[i].subcode);
-			printf("Opening %s \n",c[i].page->filename);
+			//printf("Seeking subcode %d \n",c[i].subcode);
+			//printf("Opening %s \n",c[i].page->filename);
 			strcpy(p.filename,c[i].page->filename);
 			*fp=fopen(c[i].page->filename,"r");
 			if (!*fp)
@@ -148,12 +148,12 @@ uint8_t addCarousel(CAROUSEL *c,PAGE *p)
 			}
 			timeInterval=p.time;
 			// At this point we either have the next page or we ran off the end
-			printf("[pageToTransmit] page %d %d Entered with %d, next found %d\n",p.mag,p.page,sc,p.subcode);
+			// printf("[pageToTransmit] page %d %d Entered with %d, next found %d\n",p.mag,p.page,sc,p.subcode);
 			// If we hit the end of file, we should restart with subcode 1
-	printf("T\n");
+	//printf("T\n");
 			if (feof(*fp)) // Ran off the end
 			{
-	printf("X\n");
+	//printf("X\n");
 				// Loop back to the start of the carousel
 				// Just reposition the text pointer to the start
 				if (fseek(*fp,0,0))
@@ -166,7 +166,7 @@ uint8_t addCarousel(CAROUSEL *c,PAGE *p)
 			}
 			else
 			{
-					printf("Y\n");
+					//printf("Y\n");
 // TODO: This works if SC follows CT otherwise we will have to do a bit more parsing
 				c[i].subcode=p.subcode;
 				if (p.time>0)
@@ -174,9 +174,9 @@ uint8_t addCarousel(CAROUSEL *c,PAGE *p)
 				else
 				{
 					timeInterval=15;		// Error, set sensible default
-					printf("[pageToTransmit] Missing time interval. Placeholder SIX\n");
+					//printf("[pageToTransmit] Missing time interval. Placeholder SIX\n");
 				}
-					printf("Z\n");
+					//printf("Z\n");
 
 			}
 			// Reschedule this carousel
@@ -195,9 +195,9 @@ uint8_t addCarousel(CAROUSEL *c,PAGE *p)
 				retval=c[i].time;
 		}
 	}
-	printf("L filename=%s mag=%d page=%02x, subcode=%d\n",p.filename,p.mag,p.page,p.subcode);
+	//printf("L filename=%s mag=%d page=%02x, subcode=%d\n",p.filename,p.mag,p.page,p.subcode);
 	*page=p;
-		printf("M\n");
+		//printf("M\n");
 	return retval;	
 } // pageToTransmit
 
@@ -353,15 +353,9 @@ void domag(void)
 			if (txwait<time(NULL))	// If we are due to transmit a carousel
 			{
 				txwait=pageToTransmit(carousel,&fil,&carPage);
-				if (!fil)
-				{
-					printf("NOPE\n");	// No we haven't got anything
-				}
-				else
-					printf("YES\n");
 				if (txwait==0)
 				{
-					printf("[domag] NULL time returned. Adding 10 second wait\n");
+					// printf("[domag] NULL time returned. Adding 10 second wait\n");
 					txwait=time(NULL)+10;					
 				}
 				else
@@ -397,7 +391,7 @@ void domag(void)
 			else
 			{
 				page=&carPage;	// The page is a carousel page
-				printf("R %s\n",carPage.filename);
+				// printf("R %s\n",carPage.filename);
 			}
 			// printf("Q page=%s\n",page->filename);
 			if (page)
@@ -428,8 +422,8 @@ void domag(void)
 				str[0]=0;
 				if (!fil)	// Carousel will already be scanned down to the page that we want
 					fil=fopen(page->filename,"r");
-				else
-					printf("[mag]Carousel filename=%s\n",page->filename);
+				//else
+				//	printf("[mag]Carousel filename=%s\n",page->filename);
 				while (strncmp(str,"OL,",3) && !feof(fil))
 					fgets(str,80,fil);
 
@@ -474,6 +468,14 @@ void domag(void)
 				Parity((char*)packet,5);
 				while (bufferIsFull(&magBuffer[mag])) delay(20);				
 				bufferPut(&magBuffer[mag],(char*)packet);	// TODO: Test for buffer full
+			}
+			if (str[0]=='F' && str[1]=='L')	// Fastext links?
+			{
+				copyFL((char*)packet,str,page->mag);
+				PacketPrefix(packet,page->mag,27); // X/27/0					
+				Parity((char*)packet,5);
+				while (bufferIsFull(&magBuffer[mag])) delay(20);				
+				bufferPut(&magBuffer[mag],(char*)packet);	// Should test for buffer full
 			}
 			// When we run out of rows to send
 			if (fil)

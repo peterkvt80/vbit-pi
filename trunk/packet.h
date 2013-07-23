@@ -2,7 +2,7 @@
  * VBIT on Raspberry Pi
  * header file for packet.c
  * 
- * Peter Kwan, Copyright 2013 , All rights reserved.
+ * Peter Kwan, Copyright 2013
  */
 
 #ifndef _PACKET_H_
@@ -17,6 +17,10 @@
 /** copyOL - Copy Output Line
  */
 uint8_t copyOL(char *packet, char *textline);
+
+/** copyFL - Copy the Fastext links
+ */
+void copyFL(char *packet, char *textline, unsigned char mag);
 
 /** dumpPacket - Display the packet in lovely hexadecimal
  */
