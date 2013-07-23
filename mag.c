@@ -61,7 +61,7 @@ static uint8_t magCount=1;	// Ensure that each thread has a different mag number
 typedef struct _CAROUSEL_ 
 {
 	PAGE *page;		/// Page meta data 
-	uint8_t time;	/// Time until the next transmission (seconds) 
+	time_t time;	/// System time of the next transmission 
 	uint32_t subcode;	/// Single pages tend to set this 0. Carousels start with 1
 } CAROUSEL;
 
@@ -97,17 +97,109 @@ uint8_t addCarousel(CAROUSEL *c,PAGE *p)
 }
 
 /** pageToTransmit - Find the next carousel page update
- * \return Time to wait until the next carousel page goes out. (max 255 seconds) Or if 0, there is no page.
+ * \param c : The carousels array
+ * \param fp : A file pointer. If there is a carousel, the file pointer will be set to the required page
+ * \param page : The page object for the selected page
+ * \return Time when the carousel page changes. Or if 0, there is no page.
  */
- time_t pageToTransmit(CAROUSEL *c)
+ time_t pageToTransmit(CAROUSEL *c, FILE** fp, PAGE *page)
 {
 	time_t t;
-	printf("car");
+	time_t retval=0;
+	uint8_t i;
+	uint8_t timeInterval=0;
+	uint32_t sc;
+	char str[80];
+	printf("K");
+	PAGE p;
+	ClearPage(&p);
+	// Get the current time
 	t=time(NULL);
-	t+=5;
-	printf("*ousel ");
-	return t;	// Replace this with some real code.
-}
+	// Which page is ready to go?
+	for (i=0;i<MAXCAROUSEL;i++)	// Check all the carousels
+	{
+		if ((c[i].page!=NULL) && c[i].time<t)	// Is the page due?
+		{
+			// This is all about finding the next subcode and 
+			// moving the file pointer ready to transmit the next page
+			printf("Seeking subcode %d \n",c[i].subcode);
+			printf("Opening %s \n",c[i].page->filename);
+			strcpy(p.filename,c[i].page->filename);
+			*fp=fopen(c[i].page->filename,"r");
+			if (!*fp)
+			{
+				printf("[pageToTransmit] file open Failed: Placeholder SEVEN str=%s\n",str);
+				*fp=NULL;
+				return 0;
+			}
+
+			// Parse until we find a bigger subpage
+			sc=c[i].subcode;	// The existing subcode
+			while (p.subcode<=sc && !feof(*fp))	// Parse the carousel
+			{
+				fgets(str,80,*fp);
+				if (ParseLine(&p, str))					// The parse failed
+				{
+					printf("[pageToTransmit] Parse Failed: Placeholder FOUR str=%s\n",str);
+					delay(1000);
+				}
+				// HACK: If subcode 1 is encountered then save the timing for this page
+				// Note: ALL pages have the same timing as the first page
+			}
+			timeInterval=p.time;
+			// At this point we either have the next page or we ran off the end
+			printf("[pageToTransmit] page %d %d Entered with %d, next found %d\n",p.mag,p.page,sc,p.subcode);
+			// If we hit the end of file, we should restart with subcode 1
+	printf("T\n");
+			if (feof(*fp)) // Ran off the end
+			{
+	printf("X\n");
+				// Loop back to the start of the carousel
+				// Just reposition the text pointer to the start
+				if (fseek(*fp,0,0))
+				{
+					printf("[pageToTransmit] Seek failed: Placeholder FIVE str=%s\n",str);
+				}
+				// And set the subcode to 1 (first page of a carousel) 
+				c[i].subcode=0; // TODO: Check this!!!
+				printf("[pageToTransmit] Out of data. Placeholder ONE\n");
+			}
+			else
+			{
+					printf("Y\n");
+// TODO: This works if SC follows CT otherwise we will have to do a bit more parsing
+				c[i].subcode=p.subcode;
+				if (p.time>0)
+					timeInterval=p.time;	// Good
+				else
+				{
+					timeInterval=15;		// Error, set sensible default
+					printf("[pageToTransmit] Missing time interval. Placeholder SIX\n");
+				}
+					printf("Z\n");
+
+			}
+			// Reschedule this carousel
+			c[i].time=time(NULL)+timeInterval; 
+			break;
+		} // page is due
+	} // for
+	// Now work out when the next carousel page changes.
+	retval=0;
+	for (i=0;i<MAXCAROUSEL;i++)
+	{
+		if (c[i].page)
+		{
+			// Find the soonest carousel change
+			if (c[i].time<retval || retval==0)
+				retval=c[i].time;
+		}
+	}
+	printf("L filename=%s mag=%d page=%02x, subcode=%d\n",p.filename,p.mag,p.page,p.subcode);
+	*page=p;
+		printf("M\n");
+	return retval;	
+} // pageToTransmit
 
 /** getMag - Allocate a magazine to a thread.
  */
@@ -213,6 +305,9 @@ void domag(void)
 	PAGE* page=NULL;
 	FILE* fil=NULL;
 	time_t txwait=0;
+	uint8_t isCarousel;
+	PAGE carPage;
+	
 	CAROUSEL carousel[MAXCAROUSEL];		// Is 16 enough carousels? If not then change this yourself.
 	char str[80];
 	// Init the transmission list for this magaine
@@ -253,34 +348,58 @@ void domag(void)
 			break;
 		case STATE_IDLE:	// Ready to start a new page
 			// Find the next page to transmit
-			
+			isCarousel=0;
 			// Timed carousel pages have priority	
-printf("A");			
 			if (txwait<time(NULL))	// If we are due to transmit a carousel
 			{
-				txwait=pageToTransmit(carousel);
-			}
-printf("B");			
-			
-			txListStart=txListIndex;	// Avoid infinite loop if we have no pages in mag, (should go to another idle state if this happens)
-			txListIndex++;
-			while(!txList[txListIndex] )
-			{
-				txListIndex++;	// This will automatically wrap, hence no range checking.
-				if (txListStart==txListIndex)	// oops. This magazine has nothing to show
+				txwait=pageToTransmit(carousel,&fil,&carPage);
+				if (!fil)
 				{
-					state=STATE_BEGIN;	
-					// printf("[domag] Magazine %d contains no pages\n",mag);
-					delay(1000);	// Might as well do nothing most of the time
-					break;
-				}				
+					printf("NOPE\n");	// No we haven't got anything
+				}
+				else
+					printf("YES\n");
+				if (txwait==0)
+				{
+					printf("[domag] NULL time returned. Adding 10 second wait\n");
+					txwait=time(NULL)+10;					
+				}
+				else
+				{
+					// If we get here then fp has a valid carousel file
+					isCarousel=1;
+				}
 			}
-			// printf("[domag] selected file=%s\n",txList[txListIndex]->filename);
-			// Now we have the page we are going to transmit. We can send the header and change state
-			// TODO
-			// Something like:
-			// Get the page object
-			page=txList[txListIndex];
+			// If we didn't get a page object from pageToTransmit, we get it from the main list
+			// isCarousel=0;	// Kill carousels for now. They are BROKEN!
+			if (!isCarousel) 
+			{
+				txListStart=txListIndex;	// Avoid infinite loop if we have no pages in mag, (should go to another idle state if this happens)
+				txListIndex++;
+				while(!txList[txListIndex] )
+				{
+					txListIndex++;	// This will automatically wrap, hence no range checking.
+					if (txListStart==txListIndex)	// oops. This magazine has nothing to show
+					{
+						state=STATE_BEGIN;	
+						// printf("[domag] Magazine %d contains no pages\n",mag);
+						delay(1000);	// Might as well do nothing most of the time
+						break;
+					}				
+				}
+				// printf("[domag] selected file=%s\n",txList[txListIndex]->filename);
+				// Now we have the page we are going to transmit. We can send the header and change state
+				// TODO
+				// Something like:
+				// Get the page object
+				page=txList[txListIndex];
+			}
+			else
+			{
+				page=&carPage;	// The page is a carousel page
+				printf("R %s\n",carPage.filename);
+			}
+			// printf("Q page=%s\n",page->filename);
 			if (page)
 			{
 				
@@ -307,13 +426,17 @@ printf("B");
 
 				// scan down to the rows
 				str[0]=0;
-				fil=fopen(page->filename,"r");
+				if (!fil)	// Carousel will already be scanned down to the page that we want
+					fil=fopen(page->filename,"r");
+				else
+					printf("[mag]Carousel filename=%s\n",page->filename);
 				while (strncmp(str,"OL,",3) && !feof(fil))
 					fgets(str,80,fil);
 
 				if (feof(fil))	// Not found any lines
 				{
 					fclose(fil);
+					fil=NULL;
 					state=STATE_IDLE;
 				}
 				else	// This is the first output line. Parse it and process it.
@@ -353,12 +476,16 @@ printf("B");
 				bufferPut(&magBuffer[mag],(char*)packet);	// TODO: Test for buffer full
 			}
 			// When we run out of rows to send
-			if (feof(fil))
+			if (fil)
 			{
-				state=STATE_IDLE;
-				fclose(fil);	// TODO: Don't try to close already closed!
+				if (feof(fil) || (str[0]=='S' && str[1]=='C'))
+				{
+					state=STATE_IDLE;
+					fclose(fil);	// TODO: Don't try to close already closed!
+					fil=NULL;
+				}
+				break;			
 			}
-			break;			
 		}
 		delay(1);	// Just something to break up the sequence
 		// TODO: We should really intercept a shutdown and release all the memory
@@ -383,6 +510,7 @@ void magInit(void)
 	for (i=0;i<maxThreads;i++) {
 		magThread[(i+1)%8]=0;
 		pthread_create(&magThread[(i+1)%8],NULL,(void*)domag,(void*)&r1);
+		printf("magInit %d done\n",i);
 	}
 } // magInit
 
