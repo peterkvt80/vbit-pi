@@ -104,6 +104,66 @@ uint8_t copyOL(char *packet, char *textline)
 	return linenumber;
 } // copyOL
 
+/** Fastext links
+ * FL,<link red>,<link green>,<link yellow,<link cyan>,<link>,<link index>
+ * \param packet : is the resulting text
+ * \param textline : A FL line from a page file
+ * \param page : Need this to get the mag. Offsets are relative to the mag
+ */
+void copyFL(char *packet, char *textline, unsigned char mag)
+{
+	unsigned long nLink;
+	// add the designation code
+	char *ptr;
+	char *p;
+	uint8_t i,j;
+	p=packet+5;
+	*p++=HamTab[0];	// Designation code 0
+	mag&=0x07;		// Mask the mag just in case. Keep it valid
+	
+	// add the link control byte. This will allow row 24 to show.
+	packet[42]=HamTab[0x0f];
+
+	// and the page CRC
+	packet[43]=HamTab[0];	// Don't know how to calculate this.
+	packet[44]=HamTab[0];
+
+	// for each of the six links
+	for (i=0; i<6; i++)
+	{
+		// TODO: Simplify this. It can't be that difficult to read 6 hex numbers.
+		// TODO: It needs to be much more flexible in the formats that it will accept
+		// Skip to the comma to get the body of the command
+		for (j=0;j<6 && ((*textline++)!=',');j++);
+		if (*(textline-1)!=',')
+		{
+			return; // failed :-(
+		}
+		// page numbers are hex
+		ptr=textline;
+		//ptr=textline-2;		
+		//*ptr='0';
+		//*(ptr+1)='x';
+		// xatoi(&ptr,&nLink);
+		nLink=strtol(ptr,NULL,16);
+		// int nLink =StrToIntDef("0x" + strParams.SubString(1 + i*4,3),0x100);
+
+			
+		// calculate the relative magazine
+		char cRelMag=(nLink/0x100 ^ mag);
+		*p++=HamTab[nLink & 0xF];			// page units
+		*p++=HamTab[(nLink & 0xF0) >> 4];	// page tens
+		*p++=HamTab[0xF];									// subcode S1
+		*p++=HamTab[((cRelMag & 1) << 3) | 7];
+		*p++=HamTab[0xF];
+		*p++=HamTab[((cRelMag & 6) << 1) | 3];
+		//if (mag==1)
+		//{
+//			printf("[copyFL]mag 1 link:%X, cRelMag=%d\n",nLink,cRelMag);
+		//}
+	}	
+} // copyFL
+
 
 /** Check that parity and reverse bits
  * Offset should be 5 for rows, 13 for header)
@@ -113,9 +173,8 @@ void Parity(char *packet, uint8_t offset)
 	int i;
 	uint8_t c;
 	for (i=offset;i<PACKETSIZE;i++)
-	{
-		
-		packet[i]=ParTab[(uint8_t)(packet[i]&0x7f)]; // Strange syntax because of ParTab in progmem
+	{		
+		packet[i]=ParTab[(uint8_t)(packet[i]&0x7f)];
 	}
 	for (i=0;i<PACKETSIZE;i++)
 	{

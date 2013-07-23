@@ -199,6 +199,6 @@ void ClearPage(PAGE *page)
 	page->timerMode='T';
 	page->control=0x8000;	// Default to parallel transmission
 	page->filesize=0;
-	page->redirect=0xff;	// Which SRAM page to redirect input from. 0..14 or 0xff for None
+	page->redirect=0xff;	// Which SRAM page to redirect input from. 0..14 or 0xff for None (Not used on VBIT-Pi)
 	page->subcode=0; 
 } // ClearPage
