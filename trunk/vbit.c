@@ -1,11 +1,43 @@
-/** Copyright notice goes here
- * 
- */
+/** ***************************************************************************
+ * Name				: vbit.c
+ * Description       : VBIT-Pi Teletext Inserter. Main loop.
+ *
+ * Copyright (C) 2010-2013, Peter Kwan
+ *
+ * Permission to use, copy, modify, and distribute this software
+ * and its documentation for any purpose and without fee is hereby
+ * granted, provided that the above copyright notice appear in all
+ * copies and that both that the copyright notice and this
+ * permission notice and warranty disclaimer appear in supporting
+ * documentation, and that the name of the author not be used in
+ * advertising or publicity pertaining to distribution of the
+ * software without specific, written prior permission.
+ *
+ * The author disclaims all warranties with regard to this
+ * software, including all implied warranties of merchantability
+ * and fitness.  In no event shall the author be liable for any
+ * special, indirect or consequential damages or any damages
+ * whatsoever resulting from loss of use, data or profits, whether
+ * in an action of contract, negligence or other tortious action,
+ * arising out of or in connection with the use or performance of
+ * this software.
+ *************************************************************************** **/
  /*
   * Currently this is set up to run in root mode.
   */
 
 #include "vbit.h"
+
+void DieWithError(char *errorMessage);  /* Error handling function */
+
+void DieWithError(char *errorMessage)
+{
+    perror(errorMessage);
+    exit(1);
+}
+
+void HandleTCPClient(int clntSocket);   /* TCP client handling function */
+#define MAXPENDING 5    /* Maximum outstanding connection requests */
 
 /* hic sunt globals */
 
@@ -28,10 +60,8 @@ volatile uint8_t fifoWriteIndex; /// maintains the load index 0..MAXFIFOINDEX-1
 */ 
 void everyFieldInterrupt(void)
 {
-	const uint32_t day=(uint32_t)60*60*24;
 	// Flash the status LED
 	static uint8_t i;
-	static uint8_t count;
 	// Tell the FIFO filler that it can start
 	/*result=*/clock_gettime(CLOCK_REALTIME,&gFieldTimespec);	// some sort of Linux timestamp
 	if (gVBIStarted==HIGH)
@@ -118,13 +148,40 @@ static uint32_t    spiSpeed ;
 
 */
 
+// Before you run this, you must run setup.sh so that WiringPi is correctly set up.
 int main (/* TODO: add args */)
 {
+	// Network stuff from http://cs.baylor.edu/~donahoo/practical/CSockets/code/TCPEchoServer.c
+    int serverSock;                    /* Socket descriptor for server */
+    int clientSock;                    /* Socket descriptor for client */	
+    struct sockaddr_in echoServAddr; /* Local address */
+    struct sockaddr_in echoClntAddr; /* Client address */	
+    unsigned short echoServPort;     /* Server port */
+    unsigned int clntLen;            /* Length of client address data structure */
 	
-	char mydata[10];
 	int i;
 	puts("Welcome to VBIT-Pi\n");
 	// System initialisations
+	echoServPort = 5570;  /* This is the local port */
+
+    /* Create socket for incoming connections */
+    if ((serverSock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
+        DieWithError("socket() failed\n");	
+	
+	/* Construct local address structure */
+    memset(&echoServAddr, 0, sizeof(echoServAddr));   /* Zero out structure */
+    echoServAddr.sin_family = AF_INET;                /* Internet address family */
+    echoServAddr.sin_addr.s_addr = htonl(INADDR_ANY); /* Any incoming interface */
+    echoServAddr.sin_port = htons(echoServPort);      /* Local port */
+
+    /* Bind to the local address */
+    if (bind(serverSock, (struct sockaddr *) &echoServAddr, sizeof(echoServAddr)) < 0)
+        DieWithError("bind() failed");
+
+    /* Mark the socket so it will listen for incoming connections */
+    if (listen(serverSock, MAXPENDING) < 0)
+        DieWithError("listen() failed");	
+	
 	// Thinks: I2C is only used during setup. We could use the two wires for something else and make the interface smaller.
 	wiringPiSetup () ;	// This must be run in root mode
 	
@@ -160,8 +217,24 @@ int main (/* TODO: add args */)
 	}
 	while (1)
 	{
-		fflush(stdout);	// Force output so it doesn't buffer ir forever
-		delay (1000) ;		
+		printf("Starting the loop\n");
+		fflush(stdout);	// Force output so it doesn't buffer it forever
+		delay (1000) ;	
+
+        /* Set the size of the in-out parameter */
+        clntLen = sizeof(echoClntAddr);
+
+        /* Wait for a client to connect */
+        if ((clientSock = accept(serverSock, (struct sockaddr *) &echoClntAddr, 
+                               &clntLen)) < 0)
+            DieWithError("accept() failed");
+
+        /* clientSock is connected to a client! */
+
+        printf("Handling client %s\n", inet_ntoa(echoClntAddr.sin_addr));
+
+        HandleTCPClient(clientSock);
+		
 	}
 	puts("Finished\n"); // impossible to get here
 	return 1;

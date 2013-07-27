@@ -7,6 +7,9 @@
 #include <linux/spi/spidev.h>
 #include <time.h>
 
+#include <sys/socket.h> /* for socket(), bind(), and connect() */
+#include <arpa/inet.h>  /* for sockaddr_in and inet_ntoa() */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
