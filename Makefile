@@ -19,7 +19,8 @@ OBJ = vbit.o				\
 	mag.o \
 	buffer.o \
 	page.o \
-	FILLFifo.o 
+	FILLFifo.o \
+	HandleTCPClient.o
 
 #Any special libraries you are using (e.g. "-lbcm2835"), or leave blank
 LIBS = -lwiringPi -lrt
