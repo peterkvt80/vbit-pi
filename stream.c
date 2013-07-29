@@ -20,19 +20,17 @@ uint8_t streamPacket[STREAMBUFFERSIZE*PACKETSIZE];
 static char priority[8]={5,1,1,3,3,5,5,9};
 static char priorityCount[8];
 
-// TODO Is the current packet. Implemented elsewhere
-uint8_t isHeader(bufferpacket *bp)
-{
-return 0;
-}
-
 PI_THREAD (Stream)
 {
 	int mag=0;
 	uint8_t line=0;
 	uint8_t i;
 	uint8_t result;
+	uint8_t holdCount=0;	// If the entire service is on hold, we need to add lines, either filler or quiet
+	uint8_t field=0;	// Count fields
 	uint8_t hold[8];	// If hold is set then we must wait for the next field to reset them
+	uint32_t skip=0;	// How many lines we were unable to put real packets on
+	uint8_t packet[PACKETSIZE];	
 	for (i=0;i<8;i++)
 	{
 		hold[i]=0;
@@ -55,19 +53,38 @@ PI_THREAD (Stream)
 
 		// This scheme more or less works but there is no guarantee that it stays in sync.
 		// So we need to ensure that FillFIFO knows what this phase is and matches it to the output.
-		// The 7120 DENC only does up to 16 lines on both fields. Line 17 is not available for us :-(
-		if (line<16)
-		{
-			line++;						
-		}
-		else
+		// The 7120/7121 DENC only does up to 16 lines on both fields. Line 17 is not available for us :-(
+		// ALSO: TODO: This scheme is stupid. If an iteration fails to output a line, the line counter is still
+		// incremented. This will mess up the field counting.
+		if (line>=16)
 		{
 			line=0;
 			for (i=0;i<8;i++) hold[i]=0;	// Any holds are released now
+			field++;
 		}	
+		// TODO: Really need to put a switch here to do packet 8/30.
+		// Packet 8/30 happens every 10 fields in this sequence:
+		// format 1, then format 2 label 1, label 2, label 3, label 4.
+		// So on line 0, 160, 320, 480, 640 we do something else. on 800 we reset to 0
 		// If the source has data AND the destination has space AND the magazine has not just sent an header
+		/*
+		switch (line) // but line is reset after 16 so we will need to think this one through.
+		{
+		case 0: // packet 8/30 format 1
+			break;
+		case 160: // packet 8/30 format 2 label 1
+			break;
+		case 320: // packet 8/30 format 2 label 2
+			break;
+		case 480: // packet 8/30 format 2 label 3
+			break;
+		case 640: // packet 8/30 format 2 label 4
+			break;
+		}
+		*/
 		if (!hold[mag])
 		{
+			holdCount=0;
 			// Pop a packet from a mag and push it to the stream
 			// printf("[Stream] ******* GOT SOMETHING :-) Get mag buffer %d \n",mag);
 			// dumpPacket(magBuffer[mag].pkt);
@@ -88,10 +105,28 @@ PI_THREAD (Stream)
 				// printf("%01d",mag);
 				hold[mag]=1;
 				// Intentional fall through
-			case 0: break; // Normal row
+			case 0:  // Normal row
+				line++;	// Count up the lines sent
+
+				break;				
 			}
 			// TODO: If ALL fields are on hold we need to output filler or quiet
 			// TODO: Implement stream side buffer
+		}
+		else
+		{	// If there really is nothing to send, send a filler or quiet
+			holdCount++;
+			if (holdCount>=8) 	// all mags are in nip?
+			{
+				skip++;
+				printf("[stream] All mags are in nip %d\n",skip);
+				// TODO: If this message comes up,
+				// Then add quiet or filler 8/25 packets.
+				// This RARELY happens except at the start
+				line++;	// And step the line counter otherwise we can get a lock
+				PacketQuiet(packet);
+				bufferPut(streamBuffer,(char*)packet);
+			}
 		}
 		priorityCount[mag]=priority[mag];	// Reset the priority for the mag that just went out
 		//else

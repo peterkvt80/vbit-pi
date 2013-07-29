@@ -53,10 +53,10 @@ void bufferInit(bufferpacket *bp, char *buf, uint8_t len);
  */
 uint8_t bufferPut(bufferpacket *bp, char *pkt);
 
-/**bufferPutMeta
+/**bufferPutMeta. I Think we can dump this nonsense!
  * Meta packets are used to send signals between threads.
  * It does this by setting the CRI to 0 and the FC to the value of the meta tag.
- * Should realy use enums, but can't be bothered.
+ * Should really use enums, but can't be bothered.
  * Packets that we might want to send:
  * mag->stream   
  * META_PACKET_HEADER
@@ -64,7 +64,7 @@ uint8_t bufferPut(bufferpacket *bp, char *pkt);
  * META_PACKET_ODD_START
  * META_PACKET_EVEN_START
  */
-uint8_t bufferPutMeta(bufferpacket *bp, uint8_t metapkt);
+// uint8_t bufferPutMeta(bufferpacket *bp, uint8_t metapkt);
 
 /**bufferGet
  * Get packet pkt from the tail of bufferpacket bp.
