@@ -80,7 +80,8 @@ uint8_t bufferPut(bufferpacket *bp, char *pkt)
  * \param bp : buffer to put the packet onto
  * \return 0 if OK 1 if full.
  */
-uint8_t bufferPutMeta(bufferpacket *bp, uint8_t metapkt)
+/*
+ uint8_t bufferPutMeta(bufferpacket *bp, uint8_t metapkt)
 {
 	char pkt[PACKETSIZE];
 	if (bufferIsFull(bp)) return 1;
@@ -99,7 +100,7 @@ uint8_t bufferPutMeta(bufferpacket *bp, uint8_t metapkt)
 	bp->head=(bp->head+1) % bp->count;
 	return 0;
 }
-
+*/
 
 /**bufferGet
  * Get packet pkt from bufferpacket bp.
@@ -145,6 +146,16 @@ uint8_t bufferIsFull(bufferpacket *bp)
 	return 0;
 }
 
+// What is this for? It will let stream work out what the next line is
+// and if it is on the next field.
+uint8_t bufferLevel(bufferpacket *bp)
+{
+	if (bp->head>=bp->tail)
+		return (bp->head-bp->tail);
+	else
+		return (bp->count-bp->head+bp->tail);
+}
+
  /** buffermove
   * Pops from buffer b2 and pushes to b1
   * This might be handy where it comes to multiplexing mag to stream.
@@ -170,7 +181,7 @@ uint8_t bufferMove(bufferpacket *dest, bufferpacket *src)
 	uint8_t mag;
 	// TODO: Get the template from settings
 	//                      xxXxxxxxxxxxXxxxxxxxxxXxxxxxxxxx
-	const char template[]={"MPP PiFAX DAY dd MTH    hh:mm:ss"};
+	char template[]={"MPP PiFAX DAY dd MTH    hh:mm:ss"};
 	
 	if (bufferIsFull(dest))	// Quit if destination is full
 		return 3;
@@ -263,7 +274,7 @@ uint8_t bufferMove(bufferpacket *dest, bufferpacket *src)
 			b = (b & 0x33) << 2 | (b & 0xCC) >> 2;
 			b = (b & 0x55) << 1 | (b & 0xAA) >> 1;	
 			b&=0x7f;
-			c=DehamTable[b];
+			c=DehamTable[(uint8_t) b];
 			// printf("ptr[3]=%02x Rev=%02x mag=%02x mag=%02x. ",pkt[3],b,c,mag);
 		}
 		

@@ -229,8 +229,8 @@ uint8_t getList(PAGE **txList,uint8_t mag, CAROUSEL *carousel)
   // Make sure all the carousel entries are NULL
   for (i=0;i<MAXCAROUSEL;i++)
 	carousel[i].page=NULL;
-  strcpy(path,"/home/pi/Pages/");
-  //printf("Looking for pages in stream %d\n",mag);
+  strcpy(path,"/home/pi/Pages/");	// TODO: Maybe we should use ~/Pages instead?
+  // printf("Looking for pages in stream %d\n",mag);
   d = opendir(path);
   p=&page;
   if (d)
@@ -246,13 +246,13 @@ uint8_t getList(PAGE **txList,uint8_t mag, CAROUSEL *carousel)
 		  // printf("stream %d, %s\n", mag, filename);
 		  if (ParsePage(p, filename))
 		  {
-				printf("Not a valid page\n");
+				printf("Not a valid page %s\n",filename);
 		  }
 		  // printf("Comparing p->mag %d, p->page %d, mag %d\n",p->mag % 8, p->page, mag);
 		  if ((p->mag % 8)==mag)
 		  {
 			strcpy(p->filename,filename);
-			// printf("Accepted page %s\n",p->filename);
+			printf("Accepted mag %d page %s\n",mag, p->filename);
 			// Create a new page object
 			newpage=calloc(1,sizeof(PAGE));
 			// Copy the data
@@ -365,7 +365,6 @@ void domag(void)
 				}
 			}
 			// If we didn't get a page object from pageToTransmit, we get it from the main list
-			// isCarousel=0;	// Kill carousels for now. They are BROKEN!
 			if (!isCarousel) 
 			{
 				txListStart=txListIndex;	// Avoid infinite loop if we have no pages in mag, (should go to another idle state if this happens)
@@ -424,6 +423,8 @@ void domag(void)
 					fil=fopen(page->filename,"r");
 				//else
 				//	printf("[mag]Carousel filename=%s\n",page->filename);
+				// TODO: If the user changes the page file AND the header doesn't match our stored one,
+				// then we should note this fact and update the packet header.
 				while (strncmp(str,"OL,",3) && !feof(fil))
 					fgets(str,80,fil);
 
