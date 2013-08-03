@@ -93,6 +93,8 @@ uint8_t ParseLine(PAGE *page, char *str)
 			str[1]='0';
 			str[2]='x';
 			n=strtol(&str[1],NULL,0);
+			n|=0x8000;	// Add the transmission flag. Why wouldn't you want to transmit?
+			n&=~0x0040;	// Remove the serial flag, VBIT is parallel only
 			page->control=n;
 		}
 		break;
@@ -102,10 +104,12 @@ uint8_t ParseLine(PAGE *page, char *str)
 		page->time=strtol(&str[3],NULL,0);
 		break;
 	case 'S': // SP - filename or SC - subcode
+		// Subcode is HEX! 0000..3F7F
 		if (str[1]=='C')
 		{
-			n=strtol(&str[3],NULL,0);
-			// if (n>0) printf("Lets decode a subcode. %d YAY!\n",n);
+			n=strtol(&str[3],NULL,16);
+			// if (n>0) printf("Lets decode a subcode. %04x YAY!\n",n);
+			// n=0;	// TODO: Set this to 0 FOR NOW. It will kill carousels
 			page->subcode=n;	// When subcode is greater than 0 it is a carousel
 		}
 		break;

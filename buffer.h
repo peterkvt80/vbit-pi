@@ -31,9 +31,9 @@ typedef struct  {
 } bufferpacket;
 
 /* meta packet values */
-#define META_PACKET_HEADER 0
-#define META_PACKET_ODD_START 1
-#define META_PACKET_EVEN_START 2
+//#define META_PACKET_HEADER 0
+//#define META_PACKET_ODD_START 1
+//#define META_PACKET_EVEN_START 2
 
 // Functions
 
@@ -100,6 +100,11 @@ uint8_t bufferIsFull(bufferpacket *bp);
   * \return 0=OK, 1=failed 2=header
   */
 uint8_t bufferMove(bufferpacket *b1, bufferpacket *b2);
+
+/** bufferLevel - Used to work out approximately what line we are on
+ * \return The number of packets in the buffer
+ */
+uint8_t bufferLevel(bufferpacket *bp);
 
 
 

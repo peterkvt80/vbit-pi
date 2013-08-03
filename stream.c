@@ -16,8 +16,10 @@
 
 bufferpacket streamBuffer[STREAMBUFFERSIZE];
 uint8_t streamPacket[STREAMBUFFERSIZE*PACKETSIZE];
-
-static char priority[8]={5,1,1,3,3,5,5,9};
+// The lower the priority number, the faster the magazine runs.
+// This way you can choose which mags are more important.
+//                   mag 8 1 2 3 4 5 6 7
+static char priority[8]={5,1,1,3,3,5,5,9};	// 1=High priority,9=low. Note that priority[0] is mag 8!
 static char priorityCount[8];
 
 PI_THREAD (Stream)
@@ -55,7 +57,9 @@ PI_THREAD (Stream)
 		// So we need to ensure that FillFIFO knows what this phase is and matches it to the output.
 		// The 7120/7121 DENC only does up to 16 lines on both fields. Line 17 is not available for us :-(
 		// ALSO: TODO: This scheme is stupid. If an iteration fails to output a line, the line counter is still
-		// incremented. This will mess up the field counting.
+		// incremented. This will mess up the field counting. 
+		// There is no synchronising of fields so it can and does go wrong.
+		// (carousel pages breaking in over normal pages)
 		if (line>=16)
 		{
 			line=0;
@@ -99,7 +103,8 @@ PI_THREAD (Stream)
 			case 4: 	// Source not ready. We expect mag to send us something very soon
 				// If a stream has no pages, this branch will get called a lot
 				// printf("[Stream] Waiting for source\n"); // If this is called then mag has failed.
-				delay(1);	// Hold so we can see the error
+				hold[mag]=1;	// Might as well put it in hold. If this isn't here then the mag can grab ALL the packets
+				// delay(1);	// Hold so we can see the error
 				break;
 			case 2:		// Header row
 				// printf("%01d",mag);
@@ -119,7 +124,7 @@ PI_THREAD (Stream)
 			if (holdCount>=8) 	// all mags are in nip?
 			{
 				skip++;
-				printf("[stream] All mags are in nip %d\n",skip);
+				//printf("[stream] inserting quiet %d\n",skip);	// You can remove this line. It is for debugging
 				// TODO: If this message comes up,
 				// Then add quiet or filler 8/25 packets.
 				// This RARELY happens except at the start
@@ -128,6 +133,7 @@ PI_THREAD (Stream)
 				bufferPut(streamBuffer,(char*)packet);
 			}
 		}
+		if (priority[mag]==0) priority[mag]=1;	// Can't be 0 or that mag will take all the packets
 		priorityCount[mag]=priority[mag];	// Reset the priority for the mag that just went out
 		//else
 		//	printf("[Stream] mag buffer %d is empty\n",mag);
