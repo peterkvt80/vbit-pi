@@ -195,7 +195,7 @@ uint8_t addCarousel(CAROUSEL *c,PAGE *p)
 				retval=c[i].time;
 		}
 	}
-	//printf("L filename=%s mag=%d page=%02x, subcode=%d\n",p.filename,p.mag,p.page,p.subcode);
+	printf("[PageToTransmit] L filename=%s mag=%d page=%02x, subcode=%d\n",p.filename,p.mag,p.page,p.subcode);
 	*page=p;
 		//printf("M\n");
 	return retval;	
@@ -355,7 +355,7 @@ void domag(void)
 				txwait=pageToTransmit(carousel,&fil,&carPage);
 				if (txwait==0)
 				{
-					// printf("[domag] NULL time returned. Adding 10 second wait\n");
+					printf("[domag] mag=%d NULL time returned. Adding 10 second wait\n",mag);
 					txwait=time(NULL)+10;					
 				}
 				else
@@ -390,7 +390,7 @@ void domag(void)
 			else
 			{
 				page=&carPage;	// The page is a carousel page
-				// printf("R %s\n",carPage.filename);
+				printf("[domag]R %s\n",carPage.filename);
 			}
 			// printf("Q page=%s\n",page->filename);
 			if (page)

@@ -71,7 +71,7 @@ uint8_t copyOL(char *packet, char *textline)
 		printf("[copyOL]Fail=%s",textline);
 		return 0xff; // failed
 	}
-	for (p=packet+5;p<(packet+PACKETSIZE);p++)*p='P'; // If you see a line full of P, we dun goofed.
+	for (p=packet+5;p<(packet+PACKETSIZE);p++)*p=' '; // Stuff with spaces in case the OL command is too short
 	for (p=packet+5;*textline && p<(packet+PACKETSIZE);textline++) // Stop on end of file OR packet over run
 	{
 		// TODO: Also need to check viewdata escapes
@@ -82,7 +82,7 @@ uint8_t copyOL(char *packet, char *textline)
 			if ((ch & 0x7f)==0x0a)		
 			{
 				// *p=0x0d; // Translate lf to cr (double height)
-				*p='?';
+				*p=' ';
 			}
 			else
 				*p=ch;
@@ -91,6 +91,7 @@ uint8_t copyOL(char *packet, char *textline)
 		{
 			// \r is not valid in an MRG page, so it must be a truncated line
 			// Fill the rest of the line in with blanks
+			// Doesn't seem to work on Pi. Maybe only for XMega.
 			char *r;
 			for (r=p;r<(packet+PACKETSIZE);r++)
 				*r=' '; // fill to end with blanks
