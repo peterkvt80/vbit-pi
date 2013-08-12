@@ -55,12 +55,8 @@ uint8_t ParseLine(PAGE *page, char *str)
 	if (str[0]==0) return 0;	// Nothing to parse
 	if (str[2]!=',')
 	{
-<<<<<<< .mine
 		// Not sure why lines with too many spaces break this
 		printf("[Parse line]Bad format %s\n",str); // Comma in wrong place
-=======
-		printf("[Parse line]Bad format %s\n",str); // Comma in wrong place
->>>>>>> .r13
 		return 1;
 	}
 	switch (str[0])
