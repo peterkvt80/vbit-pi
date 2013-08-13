@@ -81,7 +81,7 @@ uint8_t addCarousel(CAROUSEL *c,PAGE *p)
 		// Not sure why this doesn't work, or if we actually need it
 		if (c[i].page==p)
 		{
-			printf("[addCarousel]Oh dear, we found a duplicate. Now what? %ul ",p); // Ignore it and hope it goes away
+			printf("[addCarousel]Oh dear, we found a duplicate. Now what? %ul ",(unsigned int)p); // Ignore it and hope it goes away
 			return 1;
 		}
 		if (c[i].page==NULL && !found) // record the first empty slot found
@@ -99,10 +99,10 @@ uint8_t addCarousel(CAROUSEL *c,PAGE *p)
 
 	// We found an empty slot. Lets go fill it
 	printf("[addCarousel]Carousel \"%s\" (%d%02x), SC=%d in %d\n",p->filename,p->mag,p->page,p->subcode,foundindex);
-	printf("[addCarousel] p=%ul\n",p);
+	printf("[addCarousel] p=%u\n",(unsigned int)p);
 	c[foundindex].page=p;
 	c[foundindex].subcode=0;	// Start from a sensible place
-	c[foundindex].time=0;
+	c[foundindex].time=time(NULL);
 	return 0;	
 }
 
@@ -116,7 +116,7 @@ uint8_t addCarousel(CAROUSEL *c,PAGE *p)
 {
 	time_t t;
 	time_t retval=0;
-	uint8_t i,j;
+	uint8_t i;
 	uint8_t timeInterval=0;
 	uint32_t sc;
 	char str[80];
@@ -125,7 +125,7 @@ uint8_t addCarousel(CAROUSEL *c,PAGE *p)
 
 	if (!c[0].page) return 0;	// If there are no carousels, exit immediately
 	ClearPage(&p);
-	sprintf(p.filename,"no filename found on mag %d",mag);
+	//sprintf(p.filename,"no filename found on mag %d",mag);
 	// Get the current time
 	t=time(NULL);
 	// Which page is ready to go?
@@ -157,9 +157,8 @@ uint8_t addCarousel(CAROUSEL *c,PAGE *p)
 					printf("[pageToTransmit] Parse Failed: Placeholder FOUR str=%s fn=%s\n",str,c[i].page->filename);
 					delay(1000);
 				}
-				// HACK: If subcode 1 is encountered then save the timing for this page
-				// Note: ALL pages have the same timing as the first page
-				if (p.subcode==1 && p.time)
+				// Note: A carousel takes timing from the first CT command only
+				if (p.time && !timeInterval)
 				{
 					timeInterval=p.time;
 					printf("[pageToTransmit] Mag %d, time interval=%d\n",mag, p.time);
@@ -207,24 +206,32 @@ uint8_t addCarousel(CAROUSEL *c,PAGE *p)
 	retval=0;
 	for (i=0;i<MAXCAROUSEL;i++)
 	{
-		if (c[i].page)
+		if (c[i].page) // if the page exists
 		{
-			// Find the soonest carousel change
-			if (c[i].time<retval || retval==0)
+			if (c[i].time>0)	// a valid time 
 			{
-				retval=c[i].time;
+				// Save the time if we don't have one or it is less than what we have
+				if (c[i].time<retval || retval==0)
+				{
+					retval=c[i].time;
+				}
+			}
+			else
+			{
+				printf("[pageToTransmit] Mag %d, carousel %d, Time is 0. This is bad\n",mag,i);
 			}
 		}
 	}
-	printf("Mag %d, Next retval=%d\n",mag,retval);
-	if (!p.filename[0])	// For some reason got here without a page? 
+	printf("Mag %d, Next retval=%d\n",mag,(int)retval);
+	if (!p.filename[0])	// For some reason got here without a page? (If ClearPage sets a null string)
 	{
 		printf("[pageToTransmit] filename bug that needs fixing\n");
 		retval=0;	// Really need to investigate how this fails. It should never happen.
 	}
+	
 	*page=p;
 	printf("[PageToTransmit] L filename=%s mag=%d page=%02x, subcode=%d\n",p.filename,p.mag,p.page,p.subcode);
-	printf("M retval=%d\n",retval);
+	printf("M retval=%d\n",(int)retval);
 	return retval;	
 } // pageToTransmit
 
@@ -353,9 +360,11 @@ void domag(void)
 		piUnlock(1);
 		return;
 	}
+	printf("[domag] Carousels found on mag %d\n",mag);
 	for (i=0;i<MAXCAROUSEL;i++)
 	{
-		printf("[domag] mag=%d pageaddr=%d\n",mag,carousel[i]);
+		if (carousel[i].page)
+			printf("[domag] mag=%d pageaddr=%d\n",mag,carousel[i]);
 	}
 	piUnlock(1);
 	printf("Mag thread is initialised: mag=%d\n",mag);
@@ -537,7 +546,7 @@ void domag(void)
 void magInit(void)
 {
 	int i;
-	const int maxThreads=3; 	// should be 8
+	const int maxThreads=8; 	// should be 8
 	magCount=1;
 	for (i=0;i<8;i++)
 	{
