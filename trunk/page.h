@@ -24,10 +24,7 @@
  *************************************************************************** **/
 #ifndef _PAGE_H_
 #define _PAGE_H_
-// xmega specific stuff
-//#include "xitoa.h"
-//#include "../SDCard/ff.h"
-//#include "../SDCard/diskio.h"
+
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>     /* atoi */
