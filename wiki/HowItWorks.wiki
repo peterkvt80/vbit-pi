@@ -7,9 +7,11 @@ VBIT-Pi is written in C and is designed to run on the Raspberry Pi with VBIT-pi 
 The software is arranged as a set of threads. Eight magazine threads generate packet streams. These are multiplexed by another thread into transmission order and output to another thread that jumps in to fill the fifo immediately after VBI.
 
 = Details =
-VBIT-pi is split into many C files.
+setup.sh calls the WiringPi gpio facility which configures the gpio, spi and I2C. This must be run before the vbit code.
+
+The VBIT-pi code itself is split into many C files.
 ==mag.c==
-mag.c converts teletext files into streams of packets. It first scans all of the ~/Pages folder and then streams out a magazine. There is one thread per magazine. mag.c [will] look[s] after the carousels.
+mag.c converts teletext files into streams of packets. It first scans all of the ~/Pages folder and then streams out a magazine to stream.c. There is one thread per magazine. mag.c looks after the carousels. Carousels are handled by a special list that maintains the state of each carousel.
 ==packet.c==
 packet.c has routines for assembling packets. From a raw packet it must create an ham encoded MRAG, header packets and control bits. It then reverses bits into transmission order and performs odd parity. It is mainly called by mag.c to help in creating transmission ready packets.
 ==stream.c==
