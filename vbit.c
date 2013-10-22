@@ -148,8 +148,11 @@ static uint32_t    spiSpeed ;
 
 */
 
-// Before you run this, you must run setup.sh so that WiringPi is correctly set up.
-int main (/* TODO: add args */)
+/** Look for a client 
+ * 	This will handle commands but doesn't do anything ATM.
+ * Think this will need to go in a thread
+ */
+void runClient(void)
 {
 	// Network stuff from http://cs.baylor.edu/~donahoo/practical/CSockets/code/TCPEchoServer.c
     int serverSock;                    /* Socket descriptor for server */
@@ -158,21 +161,20 @@ int main (/* TODO: add args */)
     struct sockaddr_in echoClntAddr; /* Client address */	
     unsigned short echoServPort;     /* Server port */
     unsigned int clntLen;            /* Length of client address data structure */
-	
-	int i;
-	puts("Welcome to VBIT-Pi\n");
-	// System initialisations
+
 	echoServPort = 5570;  /* This is the local port */
 
-    /* Create socket for incoming connections */
-    if ((serverSock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
-        DieWithError("socket() failed\n");	
-	
+	// System initialisations
 	/* Construct local address structure */
     memset(&echoServAddr, 0, sizeof(echoServAddr));   /* Zero out structure */
     echoServAddr.sin_family = AF_INET;                /* Internet address family */
     echoServAddr.sin_addr.s_addr = htonl(INADDR_ANY); /* Any incoming interface */
     echoServAddr.sin_port = htons(echoServPort);      /* Local port */
+
+    /* Create socket for incoming connections */
+    if ((serverSock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
+        DieWithError("socket() failed\n");	
+	
 
     /* Bind to the local address */
     if (bind(serverSock, (struct sockaddr *) &echoServAddr, sizeof(echoServAddr)) < 0)
@@ -182,9 +184,36 @@ int main (/* TODO: add args */)
     if (listen(serverSock, MAXPENDING) < 0)
         DieWithError("listen() failed");	
 	
-	// Thinks: I2C is only used during setup. We could use the two wires for something else and make the interface smaller.
-	wiringPiSetup () ;	// This must be run in root mode
+
+
+	/* Set the size of the in-out parameter */
+	clntLen = sizeof(echoClntAddr);
+
+	/* Wait for a client to connect */
+	if ((clientSock = accept(serverSock, (struct sockaddr *) &echoClntAddr, 
+						   &clntLen)) < 0)
+		DieWithError("accept() failed");
+
+	/* clientSock is connected to a client! */
+
+	printf("Handling client %s\n", inet_ntoa(echoClntAddr.sin_addr));
+
+	HandleTCPClient(clientSock);
+} // runClient
+
+
+// Before you run this, you must run setup.sh so that WiringPi is correctly set up.
+int main (/* TODO: add args */)
+{
 	
+	int i;
+	uint8_t j;
+	puts("Welcome to VBIT-Pi\n");
+	// Thinks: I2C is only used during setup. We could use the two wires for something else and make the interface smaller.
+	// Unless you add something like an MRG keypad then you're stuck.
+	wiringPiSetup () ;	// This must be run in root mode
+
+	keypad_init(); // TODO: Use the return 
 	i2c_init();		// Does all of the video inits. The video out should start
 	pinMode (7, OUTPUT) ;	// The LED. TODO: Alias GPIO names FLD/CSN/MUX
 	pinMode (GPIO_MUX, OUTPUT) ;	// The LED. TODO: Alias GPIO names FLD/CSN/MUX
@@ -217,23 +246,19 @@ int main (/* TODO: add args */)
 	}
 	while (1)
 	{
-		printf("Starting the loop\n");
+		// printf("Starting the loop\n");
 		fflush(stdout);	// Force output so it doesn't buffer it forever
-		delay (1000) ;	
-
-        /* Set the size of the in-out parameter */
-        clntLen = sizeof(echoClntAddr);
-
-        /* Wait for a client to connect */
-        if ((clientSock = accept(serverSock, (struct sockaddr *) &echoClntAddr, 
-                               &clntLen)) < 0)
-            DieWithError("accept() failed");
-
-        /* clientSock is connected to a client! */
-
-        printf("Handling client %s\n", inet_ntoa(echoClntAddr.sin_addr));
-
-        HandleTCPClient(clientSock);
+		delay(1);	
+		for (i=0;i<8;i++)
+		{
+			if (i!=5)	// Avoid SAA7113 chip which shares the address
+			{
+				j=read_keychar(i);
+				if (j>0 && j<255)
+					printf("Key[%d]=%d\n",i,j);
+			}
+		}
+		// runClient();
 		
 	}
 	puts("Finished\n"); // impossible to get here
