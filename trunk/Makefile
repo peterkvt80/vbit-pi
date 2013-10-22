@@ -20,6 +20,7 @@ OBJ = vbit.o				\
 	buffer.o \
 	page.o \
 	FILLFifo.o \
+	keypad.o \
 	HandleTCPClient.o
 
 #Any special libraries you are using (e.g. "-lbcm2835"), or leave blank

@@ -27,5 +27,6 @@
 #include "packet.h"
 #include "stream.h"
 #include "mag.h"
+#include "keypad.h"
 
 #endif
