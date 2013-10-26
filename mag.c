@@ -4,6 +4,10 @@
  * This list of pages is used to sequence packets for this mag.
  * There are eight instances of this thread, one per mag.
  *
+ * The main problem with this code is that it doesn't manage 
+ * transmission rules properly and decoders might miss a line or two
+ * if the header goes out on the same field.
+ *
  * Compiler          : GCC
  *
  * Copyright (C) 2013, Peter Kwan
@@ -161,7 +165,7 @@ uint8_t addCarousel(CAROUSEL *c,PAGE *p)
 				if (p.time && !timeInterval)
 				{
 					timeInterval=p.time;
-					printf("[pageToTransmit] Mag %d, time interval=%d\n",mag, p.time);
+					// printf("[pageToTransmit] Mag %d, time interval=%d\n",mag, p.time);
 				}
 			}
 			// timeInterval=p.time;
@@ -222,7 +226,7 @@ uint8_t addCarousel(CAROUSEL *c,PAGE *p)
 			}
 		}
 	}
-	printf("Mag %d, Next retval=%d\n",mag,(int)retval);
+	// printf("Mag %d, Next retval=%d\n",mag,(int)retval);
 	if (!p.filename[0])	// For some reason got here without a page? (If ClearPage sets a null string)
 	{
 		printf("[pageToTransmit] filename bug that needs fixing\n");
@@ -231,7 +235,7 @@ uint8_t addCarousel(CAROUSEL *c,PAGE *p)
 	
 	*page=p;
 	printf("[PageToTransmit] L filename=%s mag=%d page=%02x, subcode=%d\n",p.filename,p.mag,p.page,p.subcode);
-	printf("M retval=%d\n",(int)retval);
+	// printf("M retval=%d\n",(int)retval);
 	return retval;	
 } // pageToTransmit
 
@@ -411,6 +415,7 @@ void domag(void)
 			// If we didn't get a page object from pageToTransmit, we get it from the main list
 			if (!isCarousel) 
 			{
+				// Find the next page in the main sequence
 				txListStart=txListIndex;	// Avoid infinite loop if we have no pages in mag, (should go to another idle state if this happens)
 				txListIndex++;
 				while(!txList[txListIndex] )
@@ -425,11 +430,8 @@ void domag(void)
 					}				
 				}
 				// printf("[domag] selected file=%s\n",txList[txListIndex]->filename);
-				// Now we have the page we are going to transmit. We can send the header and change state
-				// TODO
-				// Something like:
-				// Get the page object
-				page=txList[txListIndex];
+				// Now we have the found the next page we get ready to transmit it.
+				page=txList[txListIndex];		// Get the page object
 			}
 			else
 			{
@@ -437,39 +439,26 @@ void domag(void)
 				// printf("[domag]R %s\n",carPage.filename);
 			}
 			// printf("Q page=%s\n",page->filename);
-			if (page)
+			if (page)	// If we found a page to transmit
 			{
-				
-				// TODO: If subcode is greater than 0, we shouldn't output the carousel
-				//if (page->subcode)
-					//printf("subcode=%d ",page->subcode);
-				
-				// printf("[domag] selected file=%s\n",txList[txListIndex]->filename);
-				//printf("[domag] selected file=%s\n",page->filename);
-				// printf("%c%01d%02x",mag+'a'-1,page->mag,page->page);
 				// TX the header
 				//sprintf(header,"P%01d%02x %s",page->mag,page->page,page->filename);
 				// Create the header. Note that we force parallel transmission by ensuring that C11 is clear
 				PacketHeader((char*)packet,page->mag,page->page,page->subcode,page->control & ~0x0040,header);
-				// The packet isn't quite finished. stream.c intercepts headers and adds dynamic elements, page, date, network ID etc.
-				
-				// PacketHeader(packet,mag,page->subpage,0,0x8040,"header");
+				// The header packet isn't quite finished. stream.c intercepts headers and adds dynamic elements, page, date, network ID etc.
 				
 				if (bufferPut(&magBuffer[mag],(char*)packet))
-					delay(20); // milliseconds
+					delay(20); // milliseconds. [TODO: This rubbish bit of code attempts to delay the page body to the next field. Due to buffering it is highly unlikely to work. We should really insert maybe up to 16 dummy lines which will tell stream.c to skip this magazine]
 				// dumpPacket((char*)packet);
-				// Open the page file
-				// fil=fopen(page->filename,"r");
 
-				// scan down to the rows
 				str[0]=0;
 				if (!fil)	// Carousel will already be scanned down to the page that we want
-					fil=fopen(page->filename,"r");
+					fil=fopen(page->filename,"r");	// Open the Page file if it is not a carousel
 				//else
 				//	printf("[mag]Carousel filename=%s\n",page->filename);
 				// TODO: If the user changes the page file AND the header doesn't match our stored one,
 				// then we should note this fact and update the packet header.
-				while (strncmp(str,"OL,",3) && !feof(fil))
+				while (strncmp(str,"OL,",3) && !feof(fil))				// scan down to the rows
 					fgets(str,80,fil);
 
 				if (feof(fil))	// Not found any lines
