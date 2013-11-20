@@ -471,12 +471,14 @@ void domag(void)
 				{
 					// printf("First line is %s\n",str);
 					row=copyOL((char*)packet,str);
-					PacketPrefix((uint8_t*)packet, page->mag, row);
-					Parity((char*)packet,5);				
-					//dumpPacket(packet);
-					while (bufferIsFull(&magBuffer[mag])) delay(20);				
-					bufferPut(&magBuffer[mag],(char*)packet);	// TODO: Test for buffer full
-					
+					if (row) // If this happens to be OL,0 then don't process packet
+					{
+						PacketPrefix((uint8_t*)packet, page->mag, row);
+						Parity((char*)packet,5);				
+						//dumpPacket(packet);
+						while (bufferIsFull(&magBuffer[mag])) delay(20);				
+						bufferPut(&magBuffer[mag],(char*)packet);	// TODO: Test for buffer full
+					}					
 					state=STATE_SENDING;
 				}
 			}
@@ -498,10 +500,13 @@ void domag(void)
 			if (str[0]=='O' && str[1]=='L')	// Double check it is OL. It could be FL.
 			{
 				row=copyOL((char*)packet,str);
-				PacketPrefix(packet,page->mag,row);			
-				Parity((char*)packet,5);
-				while (bufferIsFull(&magBuffer[mag])) delay(20);				
-				bufferPut(&magBuffer[mag],(char*)packet);	// TODO: Test for buffer full
+				if (row)	// Only insert a valid row
+				{
+					PacketPrefix(packet,page->mag,row);			
+					Parity((char*)packet,5);
+					while (bufferIsFull(&magBuffer[mag])) delay(20);				
+					bufferPut(&magBuffer[mag],(char*)packet);	// TODO: Test for buffer full
+				}
 			}
 			if (str[0]=='F' && str[1]=='L')	// Fastext links?
 			{
