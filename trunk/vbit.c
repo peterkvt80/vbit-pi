@@ -208,6 +208,8 @@ int main (/* TODO: add args */)
 	
 	int i;
 	uint8_t j;
+	char str[10];
+	char key;
 	puts("Welcome to VBIT-Pi\n");
 	// Thinks: I2C is only used during setup. We could use the two wires for something else and make the interface smaller.
 	// Unless you add something like an MRG keypad then you're stuck.
@@ -255,7 +257,32 @@ int main (/* TODO: add args */)
 			{
 				j=read_keychar(i);
 				if (j>0 && j<255)
+				{
+					key='C';
 					printf("Key[%d]=%d\n",i,j);
+					switch (j)
+					{
+					case 48: key='C';break;
+					case 49: key='9';break;
+					case 50: key='8';break;
+					case 51: key='7';break;
+					case 52: key='S';break;
+					case 53: key='6';break;
+					case 54: key='5';break;
+					case 55: key='4';break;
+					case 56: key='D';break;
+					case 57: key='3';break;
+					case 58: key='2';break;
+					case 59: key='1';break;
+					case 60: key='I';break;
+					case 61: key='>';break;
+					case 62: key='0';break;
+					case 63: key='<';break;
+					}
+					sprintf(str,"DISPLAY=:0 xdotool search --name menu key %c",key);
+					puts(str);
+					system(str);
+				}
 			}
 		}
 		// runClient();

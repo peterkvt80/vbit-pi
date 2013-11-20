@@ -181,7 +181,8 @@ uint8_t bufferMove(bufferpacket *dest, bufferpacket *src)
 	uint8_t mag;
 	// TODO: Get the template from settings
 	//                      xxXxxxxxxxxxXxxxxxxxxxXxxxxxxxxx
-	char template[]={"MPP CEEFAX 1 DAY dd MTH hh:mm/ss"};
+	// char template[]={"MPP CEEFAX 1 DAY dd MTH hh:mm/ss"};
+	char template[]={"MPP FLYFAX 1 DAY dd MTH hh:mm/ss"};
 	
 	if (bufferIsFull(dest))	// Quit if destination is full
 		return 3;
