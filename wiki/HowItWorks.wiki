@@ -19,7 +19,7 @@ Stream.c multiplexes packets from all eight magazine threads and combines them i
 ==buffer.c==
 Buffer.c is used to transfer packets between threads. It has one major role where it comes to headers. stream.c calls a routine that moves packets from one mag thread to the output stream. This routine decodes and detects headers and when headers are found it replaces the incoming header for one with a proper station ident and the correct time.
 ==FILLFifo.c==
-This runs a thread which takes multiplexed stream of packets and stuffs them into the FIFO. It spends much of it's time waiting for the VBIT to be complete before it is allowed to write the next field into the FIFO. It sees a flag that gets set by interrupt. It clears this flag and calculates how much longer it has to wait. Then it fills the FIFO with the next field and calculates how long it will be until it needs to check for the next interrupt. It then sets the FIFO to be controlled by the teletext encoder and waits.
+This runs a thread which takes multiplexed stream of packets and stuffs them into the FIFO. It spends much of it's time waiting for the VBI to be complete before it is allowed to write the next field into the FIFO. It sees a flag that gets set by interrupt. It clears this flag and calculates how much longer it has to wait. Then it fills the FIFO with the next field and calculates how long it will be until it needs to check for the next interrupt. It then sets the FIFO to be controlled by the teletext encoder and waits.
 ==vbit.c==
 vbit.c is the main code. It only sets up the various threads and then loops doing nothing much.
 ==tables.c==
