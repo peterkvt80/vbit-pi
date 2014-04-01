@@ -10,6 +10,16 @@ void DieWithError(char *errorMessage);  /* Error handling function */
 static char* pCmd;
 static char cmd[MAXCMD];
 
+void command(char* cmd)
+{
+	switch (cmd[0])
+	{
+	case 'Y' : 
+		puts( "VBIT\r\n");
+		break;
+	}
+} // command
+
 void clearCmd(void)
 {
 	pCmd=cmd;
@@ -29,6 +39,7 @@ void addChar(char ch)
 		// Got a complete command
 		printf("cmd=%s\n",cmd);
 		// TODO command();	// Call the command interpreter
+		command(cmd);
 		clearCmd();
 		// hmm, also want to send back response
 	}
