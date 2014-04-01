@@ -148,6 +148,7 @@ uint8_t bufferIsFull(bufferpacket *bp)
 
 // What is this for? It will let stream work out what the next line is
 // and if it is on the next field.
+//... but this seems too complicated, Must be an easier way to maintain the line count
 uint8_t bufferLevel(bufferpacket *bp)
 {
 	if (bp->head>=bp->tail)

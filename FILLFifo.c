@@ -61,7 +61,6 @@ PI_THREAD (FillFIFO)
 	struct timespec sincevbi;
 	long ms,ms2;
 	int i;
-	uint8_t ch='a';
 	char mydata[45*17];	// This will be replaced by the global VBI buffer 
 	char caption[100];
 	strcpy(caption,"Raspberry PiFAX   ");
@@ -87,9 +86,6 @@ PI_THREAD (FillFIFO)
 		DeselectSerialRam();			// this stops read mode  
 		digitalWrite (GPIO_MUX, LOW) ;	// mux to the CPU clock
 		// Fill mydata with text packets that we want to send
-		ch++;
-		if (ch>'z') ch='a';
-		caption[17]=ch;	// Add a little beacon
 		for (i=0;i<16;i++) // TODO. Odd and Even must be accounted for. Check on scope
 		{	
 			// TODO: Check if we have a buffer under-run
