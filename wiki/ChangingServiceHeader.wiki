@@ -36,7 +36,7 @@ Be super careful with this because it must have exactly 32 characters in it. Whe
 = Making the executable=
 To compile the code type
  make
-There may be warnings but there must be no errors.
+There may be warnings but there must be no errors. If there are errors then correct the source code and try another make.
 =Restart vbit=
 You can now just cycle the power and wait for the system to start. Or to start the system quicker type:
  sudo ./vbit
