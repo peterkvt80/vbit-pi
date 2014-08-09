@@ -28,7 +28,7 @@ You will find all the code in the vbit-pi directory. Change directory to there a
 The easiest editor is nano and in this case the header is in buffer.c
  nano buffer.c
 Using the cursor keys scroll down until you find a line that has
- char template[("MPP PiFAX  1 DAY dd MTH hh:mm/ss");
+ char template("MPP PiFAX  1 DAY dd MTH hh:mm/ss");
 Be super careful with this because it must have exactly 32 characters in it. When you are done editing, press CTRL-O to save and CTRL-X to exit.
 = Making the executable=
 To compile the code type
