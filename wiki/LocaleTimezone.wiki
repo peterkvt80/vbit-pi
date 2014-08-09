@@ -2,7 +2,7 @@
 
 = Introduction =
 
-Time and locale affect the service header. This is the top row of a teletext page. The time is used to display the date and time. The locale determines what language the days and months are in.
+Time and locale affect the service header. This is the top row of a teletext page. The time is used to display the date and time. The locale determines the language that the system uses.
 
 How does time work on vbit-pi? It needs an internet connection. The Pi fetches the time from an NTP server. The Pi then maintains this time as long as it is running. The current time is injected into the headers as it runs. The time is usually configured to London as that is my nearest city.
 
@@ -19,4 +19,4 @@ Germany is probably
  de_DE.UTF-8 UTF-8
 etc.
 Then select OK and you will be able to choose the default locale. This is where you can set your own.
-When you restart the Pi the dates will be in your new language.
+Note that the time and date names in the vbit-pi header are not affected by locale. You must change the names in a different way [that I can't remember right now]
