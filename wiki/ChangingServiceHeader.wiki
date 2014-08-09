@@ -23,6 +23,7 @@ To stop the teletext and make the messages stop, type in
 = Editing the source code =
 You will find all the code in the vbit-pi directory. Change directory to there and then see what is in there:
  cd vbit-pi
+
  ls
 The easiest editor is nano and in this case the header is in buffer.c
  nano buffer.c
