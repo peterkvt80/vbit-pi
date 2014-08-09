@@ -14,10 +14,8 @@ For these instructions you need a TV and a USB keyboard plugged into the Pi and 
 = Logging in and stopping teletext =
 
 Connect the TV to the yellow monitor phono on the Pi. You will see some debug information scroll up indicating that the teletext service is alive. Press Enter. The system should respond with:
- Raspberry login:
-Type pi
- Password:
-Type raspberry
+ Raspberry login: pi
+ Password: raspberry
 
 It will be annoying because the teletext program is running in the background and often will put up messages. Just ignore these.
 
@@ -30,11 +28,16 @@ To stop the teletext and make the messages stop, type in
 You will find all the code in the vbit-pi directory. Change directory to there and then see what is in there:
  cd vbit-pi
  ls
-The easiest editor is nano.
-
-
-
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+The easiest editor is nano and in this case the header is in buffer.c
+ nano buffer.c
+Using the cursor keys scroll down until you find a line that has
+ char template[("MPP PiFAX  1 DAY dd MTH hh:mm/ss");
+Be super careful with this because it must have exactly 32 characters in it. When you are done editing, press CTRL-O to save and CTRL-X to exit.
+= Making the executable=
+To compile the code type
+ make
+There may be warnings but there must be no errors.
+=Restart vbit=
+You can now just cycle the power and wait for the system to start. Or to start the system quicker type:
+ sudo ./vbit
+Your new header should be active.
