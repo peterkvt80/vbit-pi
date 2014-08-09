@@ -2,10 +2,6 @@
 
 = Introduction =
 
-Hello Raquel and Linde. I am writing the instructions now. I will remove this message when I have finished.
-
-Peter
-
 There are no configuration files or interfaces with the vbit-pi software. This is because I haven't written any. So what you have to do is hack the software to change it for what you want to do. The first thing that you would want to do with a vbit-pi is change the service header so I will describe how to do that for complete beginners.
 
 For these instructions you need a TV and a USB keyboard plugged into the Pi and an SD card that boots and runs a teletext service.
