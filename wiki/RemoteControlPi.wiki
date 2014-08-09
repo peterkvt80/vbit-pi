@@ -16,4 +16,4 @@ WinSCP is used to copy files. When you configure WinSCP, start a new session giv
 To copy teletext pages, move them into the folder /home/pi/Pages. When the vbit-pi is restarted then the Pages will be transmitted.
 
 =PuTTY=
-Putty is a terminal program. It gives you a remote system console. Any commands that you could type directly into the Pi can also be done on your remote PC. 
+Putty is a terminal program. It gives you a remote system console. Any commands that you could type directly into the Pi can also be done on your remote PC. PuTTY should have been installed as a side-effect of installing WinSCP. If so, then you can start PuTTY while you are in WinSCP by typing CTRL-P.
