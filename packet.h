@@ -72,5 +72,24 @@ void PacketHeader(char *packet ,unsigned char mag, unsigned char page, unsigned 
 
 extern volatile uint32_t UTC; // 10:00am
 
+/** PageEnhancementDataPacket used in VBIT initially for language codepage selection See ETSI 300706
+ *  Create a data packet for X/26, X/28, M/29
+ * \param packet : A pointer to a teletext data packet 
+ * \param mag : Magazine number, the mag number. This is the mag number in the page you are sending
+ * \param row : Row can be 26, 28 or 29
+ * \param designationCode : The packet format number 0..3. 
+ */
+void PageEnhancementDataPacket(char *packet, int mag, int row, int designationCode);
+
+/** SetTriplet sets a triplet in the packet.
+ *  Can also be used for X/1 to X/25 POP and GOP
+ *  Does ham 24/18 of the three bytes. (out of 24 bits supplied, 18 are data, the rest are HAM protection)
+ *  Do NOT apply parity or byte reversing to this. This would wreck the Ham24/18 coding
+ *  \param ix : Index of the triplet 1..13
+ *  \param triplet: An 18 bit value. 0..0x3ffff 
+ */
+void SetTriplet(char *packet, int ix, int triplet);
+
+
 #endif
 

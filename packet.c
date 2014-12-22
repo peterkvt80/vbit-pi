@@ -78,6 +78,11 @@ uint8_t copyOL(char *packet, char *textline)
 		// TODO: Also need to check viewdata escapes
 		// Only handle MRG mapping atm
 		ch=*textline; // Don't strip off the top bit just yet!
+		if (ch==0x1b) // De-escape for 7 bit viewdata mode
+		{
+			textline++;
+			ch=((*textline) & 0x1f) | 0x80;	// Turn them into MRG 8 bit escapes
+		}
 		if ((ch!=0x0d) && (ch & 0x7f)) // Do not include \r or null
 		{
 			if ((ch & 0x7f)==0x0a)		
@@ -327,3 +332,80 @@ void PacketHeader(char *packet ,unsigned char mag, unsigned char page, unsigned 
 	}
 	Parity(packet,13);		
 } // Header
+
+void PageEnhancementDataPacket(char *packet, int mag, int row, int designationCode)
+{
+	char *p;
+	char ch;
+	int i,j;
+	PacketPrefixValue((uint8_t*)packet,mag,row,0); // Also clear the remainder to 0
+	//packet[5]=HamTab[page%0x10];
+	// packet[6]=HamTab[page/0x10];
+	packet[5]=HamTab[(designationCode&0x0f)]; // S1
+}
+
+void SetTriplet(char *packet, int ix, int triplet)
+{
+	if (ix<1) return;
+	// Set ETSI 300706
+	// The whole packet is byte reversed
+	// This is a very stupid way to calculate it. There is probably
+	// a clever Justin kind of way to do it, but I am not Justin.
+	// printf ("[SetTriplet] encoding triplet=%06x\n",triplet);
+	int d1 =(triplet & 0x000001)>0;
+	int d2 =(triplet & 0x000002)>0;
+	int d3 =(triplet & 0x000004)>0;
+	int d4 =(triplet & 0x000008)>0;
+	int d5 =(triplet & 0x000010)>0;
+	int d6 =(triplet & 0x000020)>0;
+	int d7 =(triplet & 0x000040)>0;
+	int d8 =(triplet & 0x000080)>0;
+	int d9 =(triplet & 0x000100)>0;
+	int d10=(triplet & 0x000200)>0;
+	int d11=(triplet & 0x000400)>0;
+	int d12=(triplet & 0x000800)>0;
+	int d13=(triplet & 0x001000)>0;
+	int d14=(triplet & 0x002000)>0;
+	int d15=(triplet & 0x004000)>0;
+	int d16=(triplet & 0x008000)>0;
+	int d17=(triplet & 0x010000)>0;
+	int d18=(triplet & 0x020000)>0;
+	// printf("[SetTriplet] d12=%01x d11=%01x d10=%01x d9=%01x\n",d12,d11,d10,d9);
+	int p1= 1 ^ d1 ^ d2 ^ d4 ^ d5 ^ d7 ^  d9 ^ d11 ^ d12 ^ d14 ^ d16 ^ d18;
+	int p2= 1 ^ d1 ^ d3 ^ d4 ^ d6 ^ d7 ^ d10 ^ d11 ^ d13 ^ d14 ^ d17 ^ d18;
+	int p3= 1 ^ d2 ^ d3 ^ d4 ^ d8 ^ d9 ^ d10 ^ d11 ^ d15 ^ d16 ^ d17 ^ d18;
+	int p4= 1 ^ d5 ^ d6 ^ d7 ^ d8 ^ d9 ^ d10 ^ d11;
+	int p5= 1 ^ d12 ^ d13 ^ d14 ^ d15 ^ d16 ^ d17 ^ d18;
+	int p6= 1 ^ p1 ^ p2 ^ d1 ^ p3 ^ d2 ^ d3 ^ d4 ^ p4 ^ d5 ^ d6 ^ d7 ^ d8 ^ d9 ^ d10 ^
+	            d11 ^ p5 ^ d12 ^ d13 ^ d14 ^ d15 ^ d16 ^ d17 ^ d18;
+	int result=p1;				// Byte N
+	result=(result << 1) | p2;
+	result=(result << 1) | d1;
+	result=(result << 1) | p3;
+	result=(result << 1) | d2;
+	result=(result << 1) | d3;
+	result=(result << 1) | d4;
+	result=(result << 1) | p4;
+	result=(result << 1) | d5;	// Byte N+1
+	result=(result << 1) | d6;
+	result=(result << 1) | d7;
+	result=(result << 1) | d8;
+	result=(result << 1) | d9;
+	result=(result << 1) | d10;
+	result=(result << 1) | d11;
+	result=(result << 1) | p5;
+	result=(result << 1) | d12;	// Byte N+2
+	result=(result << 1) | d13;
+	result=(result << 1) | d14;
+	result=(result << 1) | d15;
+	result=(result << 1) | d16;
+	result=(result << 1) | d17;
+	result=(result << 1) | p6;
+	char *ch=(char*) &result;
+	// printf ("triplet 1=%02x 2=%02x 3=%02x\n",ch[0],ch[1],ch[2]);
+	// Now stuff the result in the packet
+	packet[ix*3+3]=ch[0];
+	packet[ix*3+4]=ch[1];
+	packet[ix*3+5]=ch[2];
+}
+

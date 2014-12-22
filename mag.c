@@ -85,25 +85,25 @@ uint8_t addCarousel(CAROUSEL *c,PAGE *p)
 		// Not sure why this doesn't work, or if we actually need it
 		if (c[i].page==p)
 		{
-			printf("[addCarousel]Oh dear, we found a duplicate. Now what? %ul ",(unsigned int)p); // Ignore it and hope it goes away
+			// printf("[addCarousel]Oh dear, we found a duplicate. Now what? %ul ",(unsigned int)p); // Ignore it and hope it goes away
 			return 1;
 		}
 		if (c[i].page==NULL && !found) // record the first empty slot found
 		{
 			found=1;
 			foundindex=i;
-			printf("[addCarousel] Found = %d\n",foundindex);
+			// printf("[addCarousel] Found = %d\n",foundindex);
 		}
 	}
 	if (!found)	// No available slots left
 	{
-		printf("[addCarousel]Can't add carousel. Sorry\n"); // oh no
+		// printf("[addCarousel]Can't add carousel. Sorry\n"); // oh no
 		return 1;
 	}
 
 	// We found an empty slot. Lets go fill it
-	printf("[addCarousel]Carousel \"%s\" (%d%02x), SC=%d in %d\n",p->filename,p->mag,p->page,p->subcode,foundindex);
-	printf("[addCarousel] p=%u\n",(unsigned int)p);
+	// printf("[addCarousel]Carousel \"%s\" (%d%02x), SC=%d in %d\n",p->filename,p->mag,p->page,p->subcode,foundindex);
+	// printf("[addCarousel] p=%u\n",(unsigned int)p);
 	c[foundindex].page=p;
 	c[foundindex].subcode=0;	// Start from a sensible place
 	c[foundindex].time=time(NULL);
@@ -364,14 +364,17 @@ void domag(void)
 		piUnlock(1);
 		return;
 	}
-	printf("[domag] Carousels found on mag %d\n",mag);
+	/*
+	 printf("[domag] Carousels found on mag %d\n",mag);
+	
 	for (i=0;i<MAXCAROUSEL;i++)
 	{
 		if (carousel[i].page)
 			printf("[domag] mag=%d pageaddr=%d\n",mag,carousel[i]);
 	}
+	*/
 	piUnlock(1);
-	printf("Mag thread is initialised: mag=%d\n",mag);
+	// printf("Mag thread is initialised: mag=%d\n",mag);
 	
 	// Initialise the magazine state
 	state=STATE_BEGIN;
@@ -479,7 +482,8 @@ void domag(void)
 						while (bufferIsFull(&magBuffer[mag])) delay(20);				
 						bufferPut(&magBuffer[mag],(char*)packet);	// TODO: Test for buffer full
 					}					
-					state=STATE_SENDING;
+					//state=STATE_SENDING;
+					state=STATE_HEADER;
 				}
 			}
 			else
@@ -492,6 +496,28 @@ void domag(void)
 	
 			// This probably should be a meta-packet that starts with anything that is not CRI.
 			// stream.c will use this to halt the mag until the next field.
+			if (page->region>0 && page->region<=0x0f) // Only send this packet if the page asks for it with a non zero RE command
+			{	
+				printf("Sending page region=%d\n",page->region);
+				// We need to send the X/28 packet first (maybe???) so here would be a good place to do it.
+				PageEnhancementDataPacket((char*) packet, page->mag, 28,0);
+				int triplet=0;
+				// Lets assemble triple 1 ETSI 300706 page 30. Also see section 9.4.2.1
+				// 1..4 Page function. We set this to 0 as a standard teletext page. 
+				// 5..7 Page coding. Set this to zero for 7 bit coding.
+				// 8..14 G0/G2/Nat opt
+				triplet=page->region<<7;
+				// 15..18 Second G0
+				
+				SetTriplet((char*) packet, 1, triplet);
+				// Should we also set triplets 1 to 13?
+				for (i=2;i<=13;i++)
+					SetTriplet((char*) packet, i, 0);
+				Parity((char*)packet,999);	// 999 ensures that we only reverse bytes. Parity would mess up Ham24/8
+				while (bufferIsFull(&magBuffer[mag])) delay(20);				
+				bufferPut(&magBuffer[mag],(char*)packet);	// TODO: Test for buffer full	
+				dumpPacket(packet);
+			}
 			state=STATE_SENDING;
 			break;
 		case STATE_SENDING:	// Transmitting rows
