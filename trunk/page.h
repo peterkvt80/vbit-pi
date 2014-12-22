@@ -43,6 +43,7 @@ typedef struct _PAGE_
 	unsigned int control;	/// C bits and non ETSI bits (See tti specification)
 	unsigned int filesize;	/// Size (bytes) of the file that this page was parsed from
 	unsigned int redirect;	/// FIFO ram page to get text data from, instead of from the file. 0..SRAMPAGECOUNT
+	unsigned int region;	/// Region selects a codepage set. 0,1,2,3,4,6,8,10
 } PAGE;
 
 /** Parse a single line of a tti teletext page

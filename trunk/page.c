@@ -124,19 +124,27 @@ uint8_t ParseLine(PAGE *page, char *str)
 		break;
 	case 'F':; // FL - fastext links
 		break;
-	case 'R':; // RT or RD
+	case 'R':; // RT, RD or RE
 		if (str[1]=='T') // RT - readback time isn't relevant
 			break;			
 		if (str[1]=='D') // RD,<n> - redirect. Read the data lines from the FIFO rather than the page file OL commands.
-		// The idea is that we can use a reserved area of RAM for dynamic pages.
-		// These are pages that change a lot and don't suit being stored in SD card
-		// 1) Read the RD parameter, which is a number between 0 and SRAMPAGECOUNT (actually 0x0e (14) atm)
-		// We will store this in the page structure ready for the packetizer to grab the SRAM 
-		str[1]='0';
-		str[2]='x';
-		n=strtol(&str[1],NULL,0);
-		page->redirect=n;
-		break;			
+		{
+			// The idea is that we can use a reserved area of RAM for dynamic pages.
+			// These are pages that change a lot and don't suit being stored in SD card
+			// 1) Read the RD parameter, which is a number between 0 and SRAMPAGECOUNT (actually 0x0e (14) atm)
+			// We will store this in the page structure ready for the packetizer to grab the SRAM 
+			str[1]='0';
+			str[2]='x';
+			n=strtol(&str[1],NULL,0);
+			page->redirect=n;
+			break;			
+		}
+		if (str[1]=='E') // RE - REgion. The number is put into X/28/0
+		{
+			page->region=strtol(&str[3],NULL,0);
+			printf("Got a region code %d\n",page->region);
+			break;			
+		}
 		
 	default :
 		printf("[Parse page]unhandled page code=%c\n",str[0]);	
@@ -146,7 +154,7 @@ uint8_t ParseLine(PAGE *page, char *str)
 } // ParseLine
 
 /** Parse a teletext page
- * \param filaname - Name of the teletext file
+ * \param filename - Name of the teletext file
  * \return true if there is an error
  */
 uint8_t ParsePage(PAGE *page, char *filename)
@@ -164,6 +172,8 @@ uint8_t ParsePage(PAGE *page, char *filename)
 		//put_rc(res);
 		return 1;
 	}
+	// Shouldn't we clear the page at this point?
+	ClearPage(page);
 	// page->filesize=(unsigned int)file.fsize; // Not sure that Pi needs this
 	// Read a line
 	// printf("[ParsePage]Ready to parse\n");
@@ -208,4 +218,5 @@ void ClearPage(PAGE *page)
 	page->filesize=0;
 	page->redirect=0xff;	// Which SRAM page to redirect input from. 0..14 or 0xff for None (Not used on VBIT-Pi)
 	page->subcode=0; 
+	page->region=0;			// region (codebase select for extra languages)
 } // ClearPage
