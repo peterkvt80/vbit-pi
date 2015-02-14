@@ -22,6 +22,7 @@ OBJ = vbit.o				\
 	page.o \
 	outputstream.o \
 	HandleTCPClient.o \
+	delay.o \
 	thread.o
 
 #Below here doesn't need to change

@@ -31,25 +31,6 @@
 
 #include "vbit.h"
 
-// START of Gordon Henderson's code
-
-/*
- * delay:
- *	Wait for some number of milliseconds
- *********************************************************************************
- */
-
-void delay (unsigned int howLong)
-{
-  struct timespec sleeper, dummy ;
-
-  sleeper.tv_sec  = (time_t)(howLong / 1000) ;
-  sleeper.tv_nsec = (long)(howLong % 1000) * 1000000 ;
-
-  nanosleep (&sleeper, &dummy) ;
-}
-
-
 void DieWithError(char *errorMessage);  /* Error handling function */
 
 void DieWithError(char *errorMessage)
@@ -136,26 +117,32 @@ int main (/* TODO: add args */)
 	
 	int i;
 
+	printf("Welcome to VBIT Streamer                  ");
 	
 	// Set up the eight magazine threads
+	printf("Setting up magazines                      ");
 	magInit();
 
 	// TODO: Test that the threads started.
 	
 	// Sequence streams of packets into VBI fields
+	printf("Setting up stream                         ");
 	i=piThreadCreate(Stream);
 	if (i != 0)
 	{
-		// printf ("Stream thread! It didn't start\n");		
+		printf ("Stream thread! It didn't start\n");		
 		return 1;
 	}
+	printf("Setting up output stream                  ");
+	
 	// Copy VBI to stdout
 	i=piThreadCreate(OutputStream);
 	if (i != 0)
 	{
-		// printf ("OutputStream thread! It didn't start\n");
+		printf ("OutputStream thread! It didn't start\n");
 		return 1;
 	}
+	printf("All streams are up and running            ");
 	while (1)
 	{
 	}

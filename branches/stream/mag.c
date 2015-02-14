@@ -272,7 +272,7 @@ uint8_t getList(PAGE **txList,uint8_t mag, CAROUSEL *carousel)
 		carousel[i].subcode=0;
 	}
   strcpy(path,"/home/pi/Pages/");	// TODO: Maybe we should use ~/Pages instead?
-  // printf("Looking for pages in stream %d\n",mag);
+  //printf("Looking for pages in stream %d\n",mag);
   d = opendir(path);
   p=&page;
   if (d)
@@ -281,20 +281,20 @@ uint8_t getList(PAGE **txList,uint8_t mag, CAROUSEL *carousel)
     {
 	  // TODO: Is it a directory?
 	  // Is it a tti page
-	  if (strcasestr(dir->d_name,".tti"))
+	  if (strcasestr(dir->d_name,".tti") || strcasestr(dir->d_name,".ttix"))
 	  {
 		  strcpy(filename,path);
 		  strcat(filename, dir->d_name);
-		  // printf("stream %d, %s\n", mag, filename);
+		  //printf("stream %d, %s\n", mag, filename);
 		  if (ParsePage(p, filename))
 		  {
-				// printf("Not a valid page %s\n",filename);
+				//printf("Not a valid page %s\n",filename);
 		  }
-		  // printf("Comparing p->mag %d, p->page %d, mag %d\n",p->mag % 8, p->page, mag);
+		  //printf("Comparing p->mag %d, p->page %d, mag %d\n",p->mag % 8, p->page, mag);
 		  if ((p->mag % 8)==mag)
 		  {
 			strcpy(p->filename,filename);
-			// printf("Accepted mag %d page %s\n",mag, p->filename);
+			//printf("Accepted mag %d page %s\n",mag, p->filename);
 			// Create a new page object
 			newpage=calloc(1,sizeof(PAGE));
 			// Copy the data
@@ -303,7 +303,7 @@ uint8_t getList(PAGE **txList,uint8_t mag, CAROUSEL *carousel)
 			// Check that we don't have a duplicate!!!
 			if (txList[p->page])
 			{
-				// printf("[mag:getList] Page already exists. old=%s, new=%s\n",txList[p->page]->filename,p->filename);
+				//printf("[mag:getList] Page already exists. old=%s, new=%s\n",txList[p->page]->filename,p->filename);
 			}
 			// If subcode is greater than 1 we want to save that page as a carousel
 			if (p->subcode>1)
@@ -313,7 +313,7 @@ uint8_t getList(PAGE **txList,uint8_t mag, CAROUSEL *carousel)
 			}
 			 else 
 				txList[p->page]=newpage;	// Store as a normal non carouselling page
-			// printf("[getList]Saved page %s mpp=%01d%02d\n",txList[p->page]->filename,txList[p->page]->mag,txList[p->page]->subpage);
+			//printf("[getList]Saved page %s mpp=%01d%02d\n",txList[p->page]->filename,txList[p->page]->mag,txList[p->page]->subpage);
 		  }
 	  }
 	  // TODO: Something wonderful with the PAGE object
@@ -360,7 +360,7 @@ void domag(void)
 	piLock(1);
 	if (getList(txList,mag,carousel))
 	{
-		// printf("Could not find pages on stream %d\n",mag);
+		printf("Could not find pages on stream %1d       \n",mag);
 		piUnlock(1);
 		return;
 	}
