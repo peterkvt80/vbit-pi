@@ -4,16 +4,16 @@
 
 By fiddling with the video registers it is possible to get Raspberry Pi to put video in the vertical blanking interval. By careful timing, it is also possible to synchronise to the video sync. So by painting the correct patterns into the video buffers at the right time it is possible to create a teletext service.
 
-To create a service you need pages, a page packetizer, and a packet to video output.
+To create a service you need pages, a page packetiser, and a packet to video output. I have written a script to get some old ITV pages, the VBIT packetiser and the raspi-teletext packet to video converter.
 
 = Details =
 
-If you want to see what is being installed then please examine the script. If you want to get started as quickly as possible then here are the instructions.
+If you want to see what is being installed then please examine the getteletext script. Any questions just email me peterk.vt80@gmail.com
 
 Short Instructions 
   * Create a Rasbian boot SD card for the Pi. Google Rasbian Download for details.
   * Boot your Pi with the card and set the Locale and Timezone. You can also expand your file partition at this time.
-  * sudo nano /boot/config.txt and set normal PAL:  sdtv_mode=2    then reboot.
+  * sudo nano /boot/config.txt and uncomment the line for normal PAL:  sdtv_mode=2    then reboot.
   * Now type these commands. It will load a configuration script then run it.
 
  wget -O getteletext http://teastop.co.uk/teletext/vbit/getteletext
@@ -22,6 +22,6 @@ Short Instructions
 
  ./getteletext
 
-Once you have installed it you can just type this command that is left in the home folder /home/pi
+Once you have installed it you can just type this command that is left in the home folder /home/pi. Connect the video to a TV set and press the TEXT button.
 
 ./go
