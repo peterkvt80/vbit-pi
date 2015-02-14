@@ -15,6 +15,7 @@
 #include "page.h"
 #include "packet.h"
 #include "buffer.h"
+#include "delay.h"
 
 /// States that each magazine can be in
 #define STATE_BEGIN	0

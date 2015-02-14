@@ -178,12 +178,12 @@ void copyFL(char *packet, char *textline, unsigned char mag)
 void Parity(char *packet, uint8_t offset)
 {
 	int i;
-	uint8_t c;
 	for (i=offset;i<PACKETSIZE;i++)
 	{		
 		packet[i]=ParTab[(uint8_t)(packet[i]&0x7f)];
 	}
 	/* DO NOT REVERSE for Raspi
+	uint8_t c;
 	for (i=0;i<PACKETSIZE;i++)
 	{
 		c=(uint8_t)packet[i];

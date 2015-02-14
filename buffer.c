@@ -178,7 +178,7 @@ uint8_t bufferMove(bufferpacket *dest, bufferpacket *src)
 	uint8_t returnCode=0;
 	char pkt[PACKETSIZE];
 	uint8_t i;
-	uint8_t c;
+	// uint8_t c;
 	time_t timer;
 	char str[9];
 	struct tm * timeinfo;

@@ -55,8 +55,8 @@ uint8_t ParseLine(PAGE *page, char *str)
 	if (str[0]==0) return 0;	// Nothing to parse
 	if (str[2]!=',')
 	{
-		// Not sure why lines with too many spaces break this
-		printf("[Parse line]Bad format %s\n",str); // Comma in wrong place
+		// Not sure why lines with too many spaces break this. A junk line will do this.
+		// printf("[Parse line]Bad format %s\n",str); // Comma in wrong place
 		return 1;
 	}
 	switch (str[0])
@@ -84,7 +84,7 @@ uint8_t ParseLine(PAGE *page, char *str)
 			page->page=n%0x100;	
 			if (page->mag>8)
 			{
-				printf("error in line %s\n",&str[1]);
+				// printf("error in line %s\n",&str[1]);
 				return 1;
 			}
 			// printf("[ParseLine]PN mag=%d page=%X, subpage=%X\n",page->mag,page->page,page->subpage);
@@ -142,12 +142,12 @@ uint8_t ParseLine(PAGE *page, char *str)
 		if (str[1]=='E') // RE - REgion. The number is put into X/28/0
 		{
 			page->region=strtol(&str[3],NULL,0);
-			printf("Got a region code %d\n",page->region);
+			// printf("Got a region code %d\n",page->region);
 			break;			
 		}
 		
 	default :
-		printf("[Parse page]unhandled page code=%c\n",str[0]);	
+		// printf("[Parse page]unhandled page code=%c\n",str[0]);	
 		return 1;
 	}
 	return 0;
@@ -168,7 +168,7 @@ uint8_t ParsePage(PAGE *page, char *filename)
 	file=fopen(filename,"r");
 	if (!file)
 	{
-		printf("[Parse page]Failed to open tti page\n");			
+		// printf("[Parse page]Failed to open tti page\n");			
 		//put_rc(res);
 		return 1;
 	}

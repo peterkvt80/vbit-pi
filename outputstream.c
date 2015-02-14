@@ -4,7 +4,6 @@ char mydata[45];
 
 PI_THREAD (OutputStream)
 {
-	int j;
 	// printf("OutputStream thread started\n");
 	while(1)
 	{

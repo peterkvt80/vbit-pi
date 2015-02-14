@@ -1,3 +1,6 @@
+/** OutputStream is a thread that waits for buffers to be ready,
+ * and then outputs them to stdout
+ */
 #ifndef _OUTPUTSTREAM_H_
 #define _OUTPUTSTREAM_H_
 

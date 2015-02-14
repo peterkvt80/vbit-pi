@@ -18,6 +18,7 @@
 // VBIT
 #include "buffer.h"
 #include "mag.h"
+#include "delay.h"
 
 
 /** Stream is a thread that 
