@@ -1,0 +1,16 @@
+#summary Run teletext from your Raspberry Pi without any additional hardware
+
+= Introduction =
+
+By fiddling with the video registers it is possible to get Raspberry Pi to put video in the vertical blanking interval. By careful timing, it is also possible to synchronise to the video sync. So by painting the correct patterns into the video buffers at the right time it is possible to create a teletext service.
+
+To create a service you need pages, a page packetizer, and a packet to video output.
+
+= Details =
+
+If you want to see what is being installed then please examine the script. If you want to get started as quickly as possible then here are the instructions.
+
+Short Instructions 
+  * Create a Rasbian boot SD card for the Pi. Google Rasbian Download for details.
+  * Boot your Pi with the card and set the Timezone. Teletext needs to know!
+  * Edit /boot/config.txt and set normal PAL:  sdtv_mode=2    then reboot.
