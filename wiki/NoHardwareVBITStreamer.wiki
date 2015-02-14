@@ -12,5 +12,10 @@ If you want to see what is being installed then please examine the script. If yo
 
 Short Instructions 
   * Create a Rasbian boot SD card for the Pi. Google Rasbian Download for details.
-  * Boot your Pi with the card and set the Timezone. Teletext needs to know!
-  * Edit /boot/config.txt and set normal PAL:  sdtv_mode=2    then reboot.
+  * Boot your Pi with the card and set the Locale and Timezone. You can also expand your file partition at this time.
+  * sudo nano /boot/config.txt and set normal PAL:  sdtv_mode=2    then reboot.
+  * Now type these commands:
+
+ wget -O getteletext http://teastop.co.uk/teletext/vbit/getteletext
+ sudo chmod +x getteletext
+ ./getteletext
