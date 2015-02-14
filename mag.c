@@ -145,7 +145,7 @@ uint8_t addCarousel(CAROUSEL *c,PAGE *p)
 			*fp=fopen(c[i].page->filename,"r");
 			if (!*fp)
 			{
-				printf("[pageToTransmit] file open Failed: Placeholder SEVEN str=%s\n",str);
+				// printf("[pageToTransmit] file open Failed: Placeholder SEVEN str=%s\n",str);
 				*fp=NULL;
 				return 0;
 			}
@@ -158,7 +158,7 @@ uint8_t addCarousel(CAROUSEL *c,PAGE *p)
 				// printf("[pageToTransmit]Parsing %s",str);	// Note: The line already has \n in it
 				if (ParseLine(&p, str))					// The parse failed
 				{
-					printf("[pageToTransmit] Parse Failed: Placeholder FOUR str=%s fn=%s\n",str,c[i].page->filename);
+					// printf("[pageToTransmit] Parse Failed: Placeholder FOUR str=%s fn=%s\n",str,c[i].page->filename);
 					delay(1000);
 				}
 				// Note: A carousel takes timing from the first CT command only
@@ -180,7 +180,7 @@ uint8_t addCarousel(CAROUSEL *c,PAGE *p)
 				// Just reposition the text pointer to the start
 				if (fseek(*fp,0,0))
 				{
-					printf("[pageToTransmit] Seek failed: Placeholder FIVE str=%s\n",str);
+					// printf("[pageToTransmit] Seek failed: Placeholder FIVE str=%s\n",str);
 				}
 				// And set the subcode to 1 (first page of a carousel) 
 				c[i].subcode=0; // The next subcode to expect would be 1, but 0 should work too.
@@ -222,19 +222,19 @@ uint8_t addCarousel(CAROUSEL *c,PAGE *p)
 			}
 			else
 			{
-				printf("[pageToTransmit] Mag %d, carousel %d, Time is 0. This is bad\n",mag,i);
+				// printf("[pageToTransmit] Mag %d, carousel %d, Time is 0. This is bad\n",mag,i);
 			}
 		}
 	}
 	// printf("Mag %d, Next retval=%d\n",mag,(int)retval);
 	if (!p.filename[0])	// For some reason got here without a page? (If ClearPage sets a null string)
 	{
-		printf("[pageToTransmit] filename bug that needs fixing\n");
+		// printf("[pageToTransmit] filename bug that needs fixing\n");
 		retval=0;	// Really need to investigate how this fails. It should never happen.
 	}
 	
 	*page=p;
-	printf("[PageToTransmit] L filename=%s mag=%d page=%02x, subcode=%d\n",p.filename,p.mag,p.page,p.subcode);
+	// printf("[PageToTransmit] L filename=%s mag=%d page=%02x, subcode=%d\n",p.filename,p.mag,p.page,p.subcode);
 	// printf("M retval=%d\n",(int)retval);
 	return retval;	
 } // pageToTransmit
@@ -288,7 +288,7 @@ uint8_t getList(PAGE **txList,uint8_t mag, CAROUSEL *carousel)
 		  // printf("stream %d, %s\n", mag, filename);
 		  if (ParsePage(p, filename))
 		  {
-				printf("Not a valid page %s\n",filename);
+				// printf("Not a valid page %s\n",filename);
 		  }
 		  // printf("Comparing p->mag %d, p->page %d, mag %d\n",p->mag % 8, p->page, mag);
 		  if ((p->mag % 8)==mag)
@@ -303,7 +303,7 @@ uint8_t getList(PAGE **txList,uint8_t mag, CAROUSEL *carousel)
 			// Check that we don't have a duplicate!!!
 			if (txList[p->page])
 			{
-				printf("[mag:getList] Page already exists. old=%s, new=%s\n",txList[p->page]->filename,p->filename);
+				// printf("[mag:getList] Page already exists. old=%s, new=%s\n",txList[p->page]->filename,p->filename);
 			}
 			// If subcode is greater than 1 we want to save that page as a carousel
 			if (p->subcode>1)
@@ -577,7 +577,7 @@ void magInit(void)
 	for (i=0;i<maxThreads;i++) {
 		magThread[(i+1)%8]=0;
 		pthread_create(&magThread[(i+1)%8],NULL,(void*)domag,(void*)&r1); 	// r1 is just a dummy arg.
-		printf("magInit %d done\n",i);
+		// printf("magInit %d done\n",i);
 	}
 } // magInit
 

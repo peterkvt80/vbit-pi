@@ -1,3 +1,6 @@
+ /**	Parts:
+  * Copyright (c) 2012 Gordon Henderson
+  */
 #ifndef _VBIT_H_
 #define _VBIT_H_
 
@@ -16,17 +19,15 @@
 
 #include <stdint.h>
 
-// Library
-#include <wiringPi.h>
-
 // Application
-#include "i2c.h"
-#include "fifo.h"
-#include "pins.h"
-#include "FILLFifo.h"
+
 #include "packet.h"
 #include "stream.h"
 #include "mag.h"
-#include "keypad.h"
+#include "outputstream.h"
+
+#include "thread.h"
+
+extern void         delay             (unsigned int howLong) ;
 
 #endif
