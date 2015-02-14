@@ -6,25 +6,23 @@ CC=gcc
 #Set any compiler flags you want to use (e.g. "-I."), or leave blank
 CFLAGS = -g -O2 -Wall -I.
 
+#Link libraries
+LIBS = -lpthread
+
 #Set any dependant files (e.g. header files) so that if they are edited they cause a re-compile (e.g. "main.h my_sub_functions.h some_definitions_file.h"), or leave blank
 DEPS = pins.h
 
 #Set all your object files (the object files of the .c files in your project, e.g. "main.o my_sub_functions.o")
 OBJ = vbit.o				\
-	i2c.o \
-	fifo.o \
 	packet.o \
 	tables.o \
 	stream.o \
 	mag.o \
 	buffer.o \
 	page.o \
-	FILLFifo.o \
-	keypad.o \
-	HandleTCPClient.o
-
-#Any special libraries you are using (e.g. "-lbcm2835"), or leave blank
-LIBS = -lwiringPi -lrt
+	outputstream.o \
+	HandleTCPClient.o \
+	thread.o
 
 #Below here doesn't need to change
 #Compile each object file

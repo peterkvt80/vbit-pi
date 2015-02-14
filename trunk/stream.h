@@ -12,22 +12,19 @@
 #include <stdint.h>
 
 //#include <stdint.h>
-// For the timing
-#include <wiringPi.h>
+
+#include "thread.h"
 
 // VBIT
 #include "buffer.h"
 #include "mag.h"
 
-//#include "fifo.h"
-//#include "pins.h"
-//#include "FILLFifo.h"
 
 /** Stream is a thread that 
 1) sinks packets from mag.c
 2) Handles packet priority and sequencing
 3) inserts special packets 8/30, databroadcast etc.
-4) sources packets to FillFIFO
+4) sources packets to stdout
 */
 PI_THREAD (Stream);
 #define STREAMBUFFERSIZE 50

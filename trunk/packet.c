@@ -69,7 +69,7 @@ uint8_t copyOL(char *packet, char *textline)
 	for (i=0;i<4 && ((*textline++)!=',');i++);
 	if (*(textline-1)!=',')
 	{
-		printf("[copyOL]Fail=%s",textline);
+		// printf("[copyOL]Fail=%s",textline);
 		return 0xff; // failed
 	}
 	for (p=packet+5;p<(packet+PACKETSIZE);p++)*p=' '; // Stuff with spaces in case the OL command is too short
@@ -183,6 +183,7 @@ void Parity(char *packet, uint8_t offset)
 	{		
 		packet[i]=ParTab[(uint8_t)(packet[i]&0x7f)];
 	}
+	/* DO NOT REVERSE for Raspi
 	for (i=0;i<PACKETSIZE;i++)
 	{
 		c=(uint8_t)packet[i];
@@ -191,6 +192,7 @@ void Parity(char *packet, uint8_t offset)
 		c = (c & 0x55) << 1 | (c & 0xAA) >> 1;	
 		packet[i]=(char)c;
 	}
+	*/
 } // Parity
 
 // Clear entire packet to a value
@@ -335,9 +337,6 @@ void PacketHeader(char *packet ,unsigned char mag, unsigned char page, unsigned 
 
 void PageEnhancementDataPacket(char *packet, int mag, int row, int designationCode)
 {
-	char *p;
-	char ch;
-	int i,j;
 	PacketPrefixValue((uint8_t*)packet,mag,row,0); // Also clear the remainder to 0
 	//packet[5]=HamTab[page%0x10];
 	// packet[6]=HamTab[page/0x10];

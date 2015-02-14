@@ -34,6 +34,11 @@
 
 #include "buffer.h"
 
+// Byte reverser
+// Either Define this for VBIT
+// or Comment it out for raspi-teletext
+// #define REVERSE
+
 // Could do with a buffer structure
 // An array of packets
 // Buffer structure: pointer to first packet, last packet head, tail.
@@ -194,9 +199,11 @@ uint8_t bufferMove(bufferpacket *dest, bufferpacket *src)
 	// So decode the packet.
 	// reverse the bit order
 	a =(uint8_t)pkt[3];
+#ifdef REVERSE	
 	a = (a & 0x0F) << 4 | (a & 0xF0) >> 4;
 	a = (a & 0x33) << 2 | (a & 0xCC) >> 2;
 	a = (a & 0x55) << 1 | (a & 0xAA) >> 1;	
+#endif
 	// mask the parity
 	a &= 0x7f;
 	// and deham the result
@@ -206,9 +213,11 @@ uint8_t bufferMove(bufferpacket *dest, bufferpacket *src)
 	
 	// And again for the next byte
 	b =(uint8_t)pkt[4];
+#ifdef REVERSE
 	b = (b & 0x0F) << 4 | (b & 0xF0) >> 4;
 	b = (b & 0x33) << 2 | (b & 0xCC) >> 2;
 	b = (b & 0x55) << 1 | (b & 0xAA) >> 1;	
+#endif
 	// mask the parity
 	b &= 0x7f;
 	// and deham the result
@@ -255,16 +264,20 @@ uint8_t bufferMove(bufferpacket *dest, bufferpacket *src)
 			ptr2[0]=(mag & 0x0f)+'0';	// Mag
 			// ptr2[3]=((mag & 0xf0)>>4) + 'a'; // temp
 			a =(uint8_t)pkt[6];
+#ifdef REVERSE			
 			a = (a & 0x0F) << 4 | (a & 0xF0) >> 4;
 			a = (a & 0x33) << 2 | (a & 0xCC) >> 2;
 			a = (a & 0x55) << 1 | (a & 0xAA) >> 1;	
+#endif
 			// mask the parity
 			a &= 0x7f;			
 			ptr2[1]=(DehamTable[(uint8_t)a]&0x0f)+'0'; 	// Page (ten)
 			a =(uint8_t)pkt[5];
+#ifdef REVERSE
 			a = (a & 0x0F) << 4 | (a & 0xF0) >> 4;
 			a = (a & 0x33) << 2 | (a & 0xCC) >> 2;
 			a = (a & 0x55) << 1 | (a & 0xAA) >> 1;	
+#endif			
 			// mask the parity
 			a &= 0x7f;			
 			ptr2[2]=(DehamTable[(uint8_t)a]&0x0f)+'0';	// Page (unit)
@@ -272,11 +285,13 @@ uint8_t bufferMove(bufferpacket *dest, bufferpacket *src)
 			
 			// TEST
 			b =(uint8_t)pkt[3];
+#ifdef REVERSE
 			b = (b & 0x0F) << 4 | (b & 0xF0) >> 4;
 			b = (b & 0x33) << 2 | (b & 0xCC) >> 2;
 			b = (b & 0x55) << 1 | (b & 0xAA) >> 1;	
+#endif			
 			b&=0x7f;
-			c=DehamTable[(uint8_t) b];
+			// c=DehamTable[(uint8_t) b];
 			// printf("ptr[3]=%02x Rev=%02x mag=%02x mag=%02x. ",pkt[3],b,c,mag);
 		}
 		
@@ -337,11 +352,13 @@ uint8_t bufferMove(bufferpacket *dest, bufferpacket *src)
 		for (i=PACKETSIZE-32;i<PACKETSIZE;i++)
 		{			
 			pkt[i]=ParTab[(uint8_t)(pkt[i]&0x7f)]; 
+#ifdef REVERSE
 			c=(uint8_t)pkt[i];
 			c = (c & 0x0F) << 4 | (c & 0xF0) >> 4;
 			c = (c & 0x33) << 2 | (c & 0xCC) >> 2;
 			c = (c & 0x55) << 1 | (c & 0xAA) >> 1;	
 			pkt[i]=(char)c;
+#endif			
 		}
 		
 		returnCode=2;	// Signal that this is a mag header

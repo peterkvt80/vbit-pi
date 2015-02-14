@@ -9,8 +9,7 @@
 
 #include <dirent.h> 
 
-// Additional libraries
-#include <wiringPi.h>
+#include "thread.h"
 
 // VBIT stuff
 #include "page.h"

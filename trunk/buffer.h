@@ -11,8 +11,6 @@
 #include <stdio.h>
 #include <time.h>
 
-#include <wiringPi.h>
-
 #include "packet.h"
 // Buffer structures are first packet, last packet, head and tail index
 // Access methods init, push, pop, isempty,isfull
