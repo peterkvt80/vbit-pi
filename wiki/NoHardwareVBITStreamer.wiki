@@ -14,8 +14,14 @@ Short Instructions
   * Create a Rasbian boot SD card for the Pi. Google Rasbian Download for details.
   * Boot your Pi with the card and set the Locale and Timezone. You can also expand your file partition at this time.
   * sudo nano /boot/config.txt and set normal PAL:  sdtv_mode=2    then reboot.
-  * Now type these commands:
+  * Now type these commands. It will load a configuration script then run it.
 
  wget -O getteletext http://teastop.co.uk/teletext/vbit/getteletext
- sudo chmod +x getteletext
+
+ chmod +x getteletext
+
  ./getteletext
+
+Once you have installed it you can just type this command that is left in the home folder /home/pi
+
+./go
