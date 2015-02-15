@@ -22,6 +22,8 @@ Short Instructions
 
  ./getteletext
 
-Once you have installed it you can just type this command that is left in the home folder /home/pi. Connect the video to a TV set and press the TEXT button.
+Once you have installed it you can just type this command that has been installed in the home folder /home/pi. 
 
 ./go
+
+Finally connect the video to a TV set and press the TEXT button.
