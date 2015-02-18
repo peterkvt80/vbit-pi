@@ -1,6 +1,6 @@
 #Code to import teletext40 raw pages
 
-= How to convert teletext40 raw pages to ttix teletext =
+= How to convert teletext40 raw pages to ttix teletext on a Rapberry Pi =
 
 1) 
 Get the teletext pages.
