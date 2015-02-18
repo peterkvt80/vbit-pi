@@ -64,7 +64,6 @@ int main (int argc, char **argv)
 	char *subpage=NULL;
 	char *name=NULL;
 	char hex[3];
-	printf("Hello mum\n");
 	uint16_t lastPage=999;
 	uint16_t thisPage=999;
 	uint16_t sub=999;
@@ -80,8 +79,11 @@ int main (int argc, char **argv)
 		fgets(txt, MAXCHAR, stdin);
 		// Split the csv fields
 		page=strtok(txt,",");
+		if (!page) break;
 		subpage=strtok(NULL,",");
+		if (!subpage) break;
 		name=strtok(NULL,",");
+		if (!name) break;
 		p=strtok(NULL,",");
 		// Decode the numbers
 		thisPage=atoi(page);
@@ -89,7 +91,6 @@ int main (int argc, char **argv)
 		if (thisPage!=lastPage)
 		{
 			// Open a new file
-			printf("New file\n");
 			if (fs) fclose(fs);
 			sprintf(fn,"ttx4t%d.ttix",thisPage);
 			fs=fopen(fn,"w");
@@ -124,7 +125,6 @@ int main (int argc, char **argv)
 	fclose(fs);
 	return 0;
 }
- 
 }}}
 
 Makefile
