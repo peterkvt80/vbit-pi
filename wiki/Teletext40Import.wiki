@@ -28,12 +28,9 @@ cp *.ttix /home/pi/Pages
 
 
 
-= Details =
+= Code =
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+Create files ttx40.c and Makefile and copy the following code into them.
 
 
 ttx40.c
