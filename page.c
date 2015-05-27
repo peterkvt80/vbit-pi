@@ -2,7 +2,7 @@
  * Name				: page.c
  * Description       : VBIT Teletext Page Parser
  *
- * Copyright (C) 2010-2013, Peter Kwan
+ * Copyright (C) 2010-2015, Peter Kwan
  *
  * Permission to use, copy, modify, and distribute this software
  * and its documentation for any purpose and without fee is hereby
