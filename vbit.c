@@ -117,23 +117,23 @@ int main (/* TODO: add args */)
 	
 	int i;
 
-	printf("Welcome to VBIT Streamer                  ");
+	//printf("Welcome to VBIT Streamer                  ");
 	
 	// Set up the eight magazine threads
-	printf("Setting up magazines                      ");
+	//printf("Setting up magazines                      ");
 	magInit();
 
 	// TODO: Test that the threads started.
 	
 	// Sequence streams of packets into VBI fields
-	printf("Setting up stream                         ");
+	//printf("Setting up stream                         ");
 	i=piThreadCreate(Stream);
 	if (i != 0)
 	{
 		printf ("Stream thread! It didn't start\n");		
 		return 1;
 	}
-	printf("Setting up output stream                  ");
+	//printf("Setting up output stream                  ");
 	
 	// Copy VBI to stdout
 	i=piThreadCreate(OutputStream);
@@ -142,7 +142,7 @@ int main (/* TODO: add args */)
 		printf ("OutputStream thread! It didn't start\n");
 		return 1;
 	}
-	printf("All streams are up and running            ");
+	//printf("All streams are up and running            ");
 	while (1)
 	{
 	}
